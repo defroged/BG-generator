@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 const formidable = require('formidable');
 
 async function loadJSONData() {
-  const data = await fs.readFile('snakesMapping.json', 'utf8');
+  const data = await fs.readFile('../snakesMapping.json', 'utf8');
   return JSON.parse(data);
 }
 
