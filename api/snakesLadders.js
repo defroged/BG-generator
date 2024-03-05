@@ -1,9 +1,10 @@
 const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
+const path = require('path');
 
 async function loadJSONData() {
-  const data = await fs.readFile('../snakesMapping.json', 'utf8');
+  const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
   return JSON.parse(data);
 }
 
