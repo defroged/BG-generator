@@ -26,17 +26,17 @@ module.exports = async (req, res) => {
 
       // Example of adding text using the parsed fields
       pdfBoxMappings.forEach(mapping => {
-        const content = fields[mapping.id]; // Access the form data for each box id
-        if (content) {
-          page.drawText(content, {
-            x: mapping.x,
-            y: mapping.y,
-            size: mapping.font.size,
-            // Load or select a font here. Example:
-            // font: await pdfDoc.embedFont(StandardFonts.Helvetica),
-          });
-        }
-      });
+  const content = fields[mapping.id]; // Access the form data for each box id
+  if (content && typeof content === 'string') {
+    page.drawText(content, {
+      x: mapping.x,
+      y: mapping.y,
+      size: mapping.font.size,
+      // Load or select a font here. Example:
+      // font: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    });
+  }
+});
 
       const modifiedPdfBytes = await pdfDoc.save();
       res.setHeader("Content-Type", "application/pdf");
