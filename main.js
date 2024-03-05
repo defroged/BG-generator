@@ -3,7 +3,6 @@ function toggleNav() {
     var mainContent = document.querySelector(".main-content");
     var hamburgerIcon = document.querySelector(".hamburger-icon");
     var eslLink = document.querySelector(".esl-link");
-    var submitGameLink = document.getElementById("submitGameLink");
     var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
 
     if (sideNav.style.width === "250px") {
