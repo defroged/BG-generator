@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 
     try {
       const pdfBoxMappings = await loadJSONData();
-      const pdfBytes = await fs.readFile('assets/snakesAndLaddersTemplate.pdf');
+      const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const page = pdfDoc.getPage(0);
 
