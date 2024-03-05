@@ -1,0 +1,170 @@
+body, input, button, textarea {
+    font-family: 'Quicksand', sans-serif;
+}
+
+h3 {
+	font-size: 40px;
+}
+
+.main-content {
+    transition: margin-left 0.5s; 
+}
+
+:root {
+    --primary-color: #1B0A26; /* Dark purple */
+    --secondary-color: #335A6; /* Dark blue */
+    --accent-color: #7E8C0F; /* Olive green */
+    --text-color: #C6D93B; /* Lime green */
+    --dark-text-color: #373737; /* Dark grey */
+    --tertiary-color: #A65A2E; /* Brown */
+    --quaternary-color: #E7BC0F; /* Mustard yellow */
+    --quinary-color: #4CAF50; /* Green */
+	--background-color: #FAFAFA; /* Very light gray */
+}
+
+body {
+    font-size: 16px;
+	color: var(--dark-text-color);
+    background: var(--background-color);
+    margin: 20px;
+    padding: 10px;
+
+}
+
+h1 {
+    color: var(--primary-color);
+    text-align: center;
+    font-weight: 700;
+    padding: 20px 0;
+}
+
+#sideNav {
+    z-index: 100; 
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none; 
+    cursor: pointer;
+    transition: background-color 0.3s ease; 
+	margin-top: 29px;
+	float: right;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+    
+
+h2 {
+    font-size: 15px;
+}
+
+.sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+  
+    .catch-phrase {
+        padding: 0px 20px 0px 20px;
+        font-size: 27px;
+    }    
+  
+  .headline {
+    margin-top: 56px;
+    margin-bottom: 15px;
+
+  }
+	.bmc-btn {
+	font-size: 15px !important; 
+    padding: 0px 10px !important;
+	height: 46px !important;
+    min-width: 135px !important;
+    font-weight: normal !important;
+	}
+    
+.fixed-container {
+  position: fixed;
+  top: 18px;
+  left: 0;
+  z-index: 101; 
+}
+
+.esl-link {
+    position: fixed;
+    left: 50px;
+	transition: left 0.5s; 
+}
+
+.esl-link img {
+  width: 150px; /* Adjust the width as needed */
+  height: auto; /* This will keep the aspect ratio of the image */
+  display: block;
+}
+
+/* hamburger menu */
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #ffffff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+    border: 1px solid cadetblue;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: black;
+}
+
+.hamburger-icon {
+    position: fixed; 
+    font-size: 30px;
+    cursor: pointer;
+    top: 15px;
+    left: 15px;
+    z-index: 1200;
+    color: #8c8b8b;
+	transition: left 0.5s, top 0.5s; 
+}
+
+/* headline */
+.headline {
+margin-top: 81px;
+  margin-bottom: 68px;
+text-align: center;
+}
+
+.bmc-button-container {
+    position: fixed; 
+    right: 0; 
+    bottom: 0; 
+    margin: 10px; 
+    
+  }
+
+.bmc-btn {
+	font-size: 15px !important; 
+    padding: 0px 10px !important;
+	height: 46px !important;
+    min-width: 135px !important;
+    font-weight: normal !important;
+	}
+	
+	.relative {
+  position: relative;
+}
