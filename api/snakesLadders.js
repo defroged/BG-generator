@@ -24,22 +24,30 @@ module.exports = async (req, res) => {
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const page = pdfDoc.getPage(0);
 
-      // Example of adding text using the parsed fields
+      // Add text using the parsed fields
       pdfBoxMappings.forEach(mapping => {
-  const content = fields[mapping.id]; // Access the form data for each box id
-  if (content && typeof content === 'string') {
-    page.drawText(content, {
-      x: mapping.x,
-      y: mapping.y,
-      size: mapping.font.size,
-      // Load or select a font here. Example:
-      // font: await pdfDoc.embedFont(StandardFonts.Helvetica),
-    });
-  }
-});
+        const content = fields[mapping.id]; // Access the form data for each box id
+        if (content && typeof content === 'string') {
+          page.drawText(content, {
+            x: mapping.x,
+            y: mapping.y,
+            size: mapping.font.size,
+            // Load or select a font here. Example:
+            // font: await pdfDoc.embedFont(StandardFonts.Helvetica),
+          });
+        }
+      });
 
       const modifiedPdfBytes = await pdfDoc.save();
+
+      // Calculate the size of the modified PDF
+      const pdfSize = Buffer.byteLength(modifiedPdfBytes);
+
+      // Set the necessary response headers
       res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Length", pdfSize); // Add the Content-Length header
+
+      // Send the modified PDF as the response
       res.send(modifiedPdfBytes);
     } catch (error) {
       console.error(error);
