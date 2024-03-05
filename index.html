@@ -15,7 +15,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <div id="sideNav" class="sidenav">
         <a href="https://www.esltools.net">Home</a>
         <a href="https://www.esltools.net/about">About</a>
@@ -32,6 +31,18 @@
 	<div class="headline">
 			<h1 class="catch-phrase">ESL Board Game & Puzzle Generator</h1>
 			</div>
+			<div class="form-container">
+    <h2>Customize Your Board Game</h2>
+    <form id="customizationForm" action="/api/snakesLadders" method="POST" enctype="multipart/form-data">
+        <div class="input-fields">
+            <!-- Dynamically generate text inputs or file uploads -->
+            <div class="input-group"><label for="box1">Box 1:</label><input type="text" id="box1" name="box1"></div>
+            <div class="input-group"><label for="box2">Box 2:</label><input type="text" id="box2" name="box2"></div>
+            <!-- more inputs -->
+        </div>
+        <button type="submit">Generate PDF</button>
+    </form>
+</div>
 
 
 <div class="bmc-button-container">
