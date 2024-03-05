@@ -8,8 +8,7 @@ function toggleNav() {
     if (sideNav.style.width === "250px") {
         sideNav.style.width = "0";
         if (viewportWidth > 768) {
-            mainContent.style.marginLeft = "0";
-            submitGameLink.style.left = "0"; 
+            mainContent.style.marginLeft = "0"; 
         }
         hamburgerIcon.style.left = "15px";
         hamburgerIcon.style.top = "15px";
@@ -17,8 +16,7 @@ function toggleNav() {
     } else {
         sideNav.style.width = "250px";
         if (viewportWidth > 768) {
-            mainContent.style.marginLeft = "250px";
-            submitGameLink.style.left = "250px"; 
+            mainContent.style.marginLeft = "250px"; 
         }
         hamburgerIcon.style.left = "200px";
         hamburgerIcon.style.top = "15px";
