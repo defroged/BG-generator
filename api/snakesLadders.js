@@ -59,8 +59,7 @@ const signedUrlConfig = {
 };
 const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
-      const downloadUrl = `https://${process.env.DOMAIN}/assets/generated_pdfs/${randomKey}.pdf`;
-      res.status(200).json({ downloadUrl: downloadUrl[0] });
+res.status(200).json({ downloadUrl: downloadUrl[0] });
 
     } catch (error) {
       console.error(error);
