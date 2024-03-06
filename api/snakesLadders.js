@@ -3,20 +3,10 @@ const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
-const credentialsBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-
-if (!credentialsBase64) {
-  throw new Error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set");
-}
-
-const credentialsJson = Buffer.from(credentialsBase64, 'base64').toString('utf-8');
-const credentials = JSON.parse(credentialsJson);
-
 const storage = new Storage({
-  projectId: credentials.project_id,
-  credentials: credentials,
+  projectId: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS).project_id,
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
 });
-
 const bucketName = 'BG Creator';
 const bucket = storage.bucket(bucketName);
 
