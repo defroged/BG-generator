@@ -3,9 +3,11 @@ const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
+const decodedCredentials = JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf8'));
+
 const storage = new Storage({
-  projectId: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS).project_id,
-  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+  projectId: decodedCredentials.project_id,
+  credentials: decodedCredentials,
 });
 const bucketName = 'BG Creator';
 const bucket = storage.bucket(bucketName);
