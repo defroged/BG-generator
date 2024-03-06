@@ -6,8 +6,8 @@ const { Storage } = require('@google-cloud/storage');
 
 
 const storage = new Storage({
-  projectId: JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf-8')).project_id,
-  credentials: JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf-8')),
+  projectId: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS).project_id,
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
 });
 const bucketName = 'BG Creator';
 const bucket = storage.bucket(bucketName);
