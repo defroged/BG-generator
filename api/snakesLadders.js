@@ -2,6 +2,16 @@ const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
+const { Storage } = require('@google-cloud/storage');
+
+
+const storage = new Storage({
+  projectId: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS).project_id,
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+});
+const bucketName = 'BG Creator';
+const bucket = storage.bucket(bucketName);
+
 
 async function loadJSONData() {
   const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
@@ -38,15 +48,23 @@ module.exports = async (req, res) => {
       const modifiedPdfBytes = await pdfDoc.save();
 
       const randomKey = Date.now();
-      const outputPath = path.resolve('assets', 'generated_pdfs', `${randomKey}.pdf`);
-      await fs.writeFile(outputPath, modifiedPdfBytes);
+      const fileName = `${randomKey}.pdf`;
+const remoteFile = bucket.file(fileName);
+await remoteFile.save(modifiedPdfBytes, { contentType: 'application/pdf' });
+
+const signedUrlConfig = {
+  action: 'read',
+  expiresIn: '12h',
+  promptSaveAs: 'customized_board_game.pdf',
+};
+const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
       const downloadUrl = `https://${process.env.DOMAIN}/assets/generated_pdfs/${randomKey}.pdf`;
-      res.status(200).json({ downloadUrl });
+      res.status(200).json({ downloadUrl: downloadUrl[0] });
 
     } catch (error) {
       console.error(error);
       res.status(500).send('An error occurred during PDF processing.');
     }
-  }); // form.parse closing
-}; // module.exports closing
+  }); 
+}; 
