@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
       const modifiedPdfBytes = await pdfDoc.save();
 
       const randomKey = Date.now();
-      const outputPath = path.join(__dirname, '..', 'assets', 'generated_pdfs', `${randomKey}.pdf`);
+      const outputPath = path.resolve('assets', 'generated_pdfs', `${randomKey}.pdf`);
       await fs.writeFile(outputPath, modifiedPdfBytes);
 
       const downloadUrl = `https://${process.env.DOMAIN}/assets/generated_pdfs/${randomKey}.pdf`;
