@@ -12,7 +12,6 @@ const storage = new Storage({
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
-
 async function loadJSONData() {
   const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
   return JSON.parse(data);
