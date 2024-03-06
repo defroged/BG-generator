@@ -2,6 +2,7 @@ const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 async function loadJSONData() {
   const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
@@ -24,34 +25,29 @@ module.exports = async (req, res) => {
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const page = pdfDoc.getPage(0);
 
-      // Add text using the parsed fields
       pdfBoxMappings.forEach(mapping => {
-        const content = fields[mapping.id]; // Access the form data for each box id
+        const content = fields[mapping.id]; 
         if (content && typeof content === 'string') {
           page.drawText(content, {
             x: mapping.x,
             y: mapping.y,
             size: mapping.font.size,
-            // Load or select a font here. Example:
-            // font: await pdfDoc.embedFont(StandardFonts.Helvetica),
           });
         }
       });
 
       const modifiedPdfBytes = await pdfDoc.save();
 
-      // Calculate the size of the modified PDF
-      const pdfSize = Buffer.byteLength(modifiedPdfBytes);
+      const randomKey = uuidv4();
+      const outputPath = path.join(__dirname, '..', 'assets', 'generated_pdfs', `${randomKey}.pdf`);
+      await fs.writeFile(outputPath, modifiedPdfBytes);
 
-      // Set the necessary response headers
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Length", pdfSize); // Add the Content-Length header
+      const downloadUrl = `https://${process.env.DOMAIN}/assets/generated_pdfs/${randomKey}.pdf`;
+      res.status(200).json({ downloadUrl });
 
-      // Send the modified PDF as the response
-      res.send(modifiedPdfBytes);
     } catch (error) {
       console.error(error);
       res.status(500).send('An error occurred during PDF processing.');
     }
-  });
-};
+  }); // form.parse closing
+}; // module.exports closing
