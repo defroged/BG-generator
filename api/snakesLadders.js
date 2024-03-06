@@ -2,7 +2,6 @@ const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 
 async function loadJSONData() {
   const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
@@ -38,7 +37,7 @@ module.exports = async (req, res) => {
 
       const modifiedPdfBytes = await pdfDoc.save();
 
-      const randomKey = uuidv4();
+      const randomKey = Date.now();
       const outputPath = path.join(__dirname, '..', 'assets', 'generated_pdfs', `${randomKey}.pdf`);
       await fs.writeFile(outputPath, modifiedPdfBytes);
 
