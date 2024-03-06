@@ -46,10 +46,13 @@ module.exports = async (req, res) => {
       });
 
       const modifiedPdfBytes = await pdfDoc.save();
+	     console.log('modifiedPdfBytes:', modifiedPdfBytes);
 
       const randomKey = Date.now().toString();
       const fileName = `${randomKey}.pdf`;
+	     console.log('fileName:', fileName);
 const remoteFile = bucket.file(fileName);
+   console.log('remoteFile:', remoteFile);
 await remoteFile.save(modifiedPdfBytes, { contentType: 'application/pdf' });
 
 const signedUrlConfig = {
