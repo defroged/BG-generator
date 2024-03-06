@@ -9,7 +9,7 @@ const storage = new Storage({
   projectId: decodedCredentials.project_id,
   credentials: decodedCredentials,
 });
-const bucketName = 'BG Creator';
+const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
 
