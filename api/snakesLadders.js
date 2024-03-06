@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
 	     console.log('fileName:', fileName);
 const remoteFile = bucket.file(fileName);
    console.log('remoteFile:', remoteFile);
-await remoteFile.save(modifiedPdfBytes, { contentType: 'application/pdf' });
+await remoteFile.save(Buffer.from(modifiedPdfBytes), { contentType: 'application/pdf' });
 
 const signedUrlConfig = {
   action: 'read',
