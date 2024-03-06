@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
 
       const modifiedPdfBytes = await pdfDoc.save();
 
-      const randomKey = Date.now();
+      const randomKey = Date.now().toString();
       const fileName = `${randomKey}.pdf`;
 const remoteFile = bucket.file(fileName);
 await remoteFile.save(modifiedPdfBytes, { contentType: 'application/pdf' });
