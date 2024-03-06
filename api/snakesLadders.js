@@ -3,8 +3,6 @@ const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
-
-console.log('GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
 const storage = new Storage({
   projectId: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS).project_id,
   credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
