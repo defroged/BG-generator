@@ -56,9 +56,11 @@ await remoteFile.save(Buffer.from(modifiedPdfBytes), { contentType: 'application
 
 const signedUrlConfig = {
   action: 'read',
-  expiresIn: '12h',
-  promptSaveAs: 'customized_board_game.pdf',
+  expires: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
+  contentDisposition: 'attachment; filename=customized_board_game.pdf',
 };
+
+
 const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
 res.status(200).json({ downloadUrl: downloadUrl[0] });
