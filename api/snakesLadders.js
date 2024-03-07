@@ -29,10 +29,12 @@ module.exports = async (req, res) => {
 
     try {
       const pdfBoxMappings = await loadJSONData();
+	  console.log('pdfBoxMappings:', pdfBoxMappings);
       const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const page = pdfDoc.getPage(0);
 
+console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
         const content = fields[mapping.id]; 
         if (content && typeof content === 'string') {
