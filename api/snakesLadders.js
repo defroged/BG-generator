@@ -42,16 +42,24 @@ module.exports = async (req, res) => {
 
       console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
-        const content = fields[mapping.id];
-        if (content && typeof content === 'string') {
-          page.drawText(content, {
-            x: mapping.x,
-            y: mapping.y,
-            size: mapping.font.size,
-            font: customFont,
-          });
-        }
-      });
+  const content = fields[mapping.id];
+  if (content && typeof content === 'string') {
+    const textWidth = customFont.widthOfTextAtSize(content, mapping.font.size);
+    const textHeight = customFont.heightAtSize(mapping.font.size);
+    const textBoxWidth = mapping.width;
+    const textBoxHeight = mapping.height;
+    
+    const newX = mapping.x + (textBoxWidth / 2) - (textWidth / 2);
+    const newY = mapping.y + (textBoxHeight / 2) - (textHeight / 2);
+ 
+    page.drawText(content, {
+      x: newX,
+      y: newY,
+      size: mapping.font.size,
+      font: customFont,
+    });
+  }
+});
 
       const modifiedPdfBytes = await pdfDoc.save();
       console.log('modifiedPdfBytes:', modifiedPdfBytes);
