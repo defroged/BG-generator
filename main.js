@@ -24,8 +24,6 @@ function toggleNav() {
         eslLink.style.left = "260px";
     }
 }
-
-
  /* Handling the form and PDF */
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('customizationForm');
