@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
       res.status(500).send('Error parsing form data.');
       return;
     }
-
+console.log('Received Fields:', fields);
     try {
       const fontBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'Arial.ttf'));
 
@@ -43,6 +43,7 @@ module.exports = async (req, res) => {
       console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
   const content = fields[mapping.id];
+  console.log('Content:', content);
   if (content && typeof content === 'string') {
     const textWidth = customFont.widthOfTextAtSize(content, mapping.font.size);
     const textHeight = customFont.heightAtSize(mapping.font.size);

@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); // Prevent the default form submission
         
         const formData = new FormData(form);
+		console.log('Form Data:', formData);
 
         // Here, you might want to loop through formData and perform any necessary preprocessing
         // For now, we'll just send it as is
