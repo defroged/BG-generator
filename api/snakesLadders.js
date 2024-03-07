@@ -4,6 +4,7 @@ const formidable = require('formidable');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
 const decodedCredentials = JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf8'));
+const fontkit = require('fontkit');
 
 const storage = new Storage({
   projectId: decodedCredentials.project_id,
@@ -28,68 +29,53 @@ module.exports = async (req, res) => {
     }
 
     try {
-  // Load the font file
-  const fontBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'Arial.ttf'));
+      const fontBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'Arial.ttf'));
 
-  const pdfBoxMappings = await loadJSONData();
-  console.log('pdfBoxMappings:', pdfBoxMappings);
+      const pdfBoxMappings = await loadJSONData();
+      console.log('pdfBoxMappings:', pdfBoxMappings);
 
-  const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
-  const pdfDoc = await PDFDocument.load(pdfBytes);
-  const page = pdfDoc.getPage(0);
+      const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+      pdfDoc.registerFontkit(fontkit); // Add this line
+      const page = pdfDoc.getPage(0);
+      const customFont = await pdfDoc.embedFont(fontBytes);
 
-  // Load the font in the PDF document
-  const customFont = await pdfDoc.embedFont(fontBytes);
-
-  console.log('Form fields:', fields);
-  pdfBoxMappings.forEach(mapping => {
-    const content = fields[mapping.id];
-    if (content && typeof content === 'string') {
-      page.drawText(content, {
-        x: mapping.x,
-        y: mapping.y,
-        size: mapping.font.size,
-        font: customFont, // Add this line to use the custom font when drawing the text
-      });
-    }
-  });
-
-console.log('Form fields:', fields);
+      console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
-        const content = fields[mapping.id]; 
+        const content = fields[mapping.id];
         if (content && typeof content === 'string') {
           page.drawText(content, {
             x: mapping.x,
             y: mapping.y,
             size: mapping.font.size,
+            font: customFont,
           });
         }
       });
 
       const modifiedPdfBytes = await pdfDoc.save();
-	     console.log('modifiedPdfBytes:', modifiedPdfBytes);
+      console.log('modifiedPdfBytes:', modifiedPdfBytes);
 
       const randomKey = Date.now().toString();
       const fileName = `${randomKey}.pdf`;
-	     console.log('fileName:', fileName);
-const remoteFile = bucket.file(fileName);
-   console.log('remoteFile:', remoteFile);
-await remoteFile.save(Buffer.from(modifiedPdfBytes), { contentType: 'application/pdf' });
+      console.log('fileName:', fileName);
+      const remoteFile = bucket.file(fileName);
+      console.log('remoteFile:', remoteFile);
+      await remoteFile.save(Buffer.from(modifiedPdfBytes), { contentType: 'application/pdf' });
 
-const signedUrlConfig = {
-  action: 'read',
-  expires: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
-  contentDisposition: 'attachment; filename=customized_board_game.pdf',
-};
+      const signedUrlConfig = {
+        action: 'read',
+        expires: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
+        contentDisposition: 'attachment; filename=customized_board_game.pdf',
+      };
 
+      const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
-const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
-
-res.status(200).json({ downloadUrl: downloadUrl[0] });
+      res.status(200).json({ downloadUrl: downloadUrl[0] });
 
     } catch (error) {
       console.error(error);
       res.status(500).send('An error occurred during PDF processing.');
     }
   }); 
-}; 
+};
