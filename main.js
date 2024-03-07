@@ -42,21 +42,19 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if(response.ok) {
-                return response.blob(); // Assuming the server responds with the PDF blob
+                return response.json(); // Read the JSON object from the response
             }
             throw new Error('Network response was not ok.');
         })
-        .then(blob => {
-            // Create a URL for the blob
-            const url = window.URL.createObjectURL(blob);
+        .then(json => {
+            const downloadUrl = json.downloadUrl; // Get the download URL from the JSON response
             // Create a link to download the PDF
             const downloadLink = document.createElement('a');
-            downloadLink.href = url;
+            downloadLink.href = downloadUrl;
             downloadLink.download = "customized_board_game.pdf"; // Set the file name
             document.body.appendChild(downloadLink);
             downloadLink.click();
-            document.body.removeChild(downloadLink);
-            window.URL.revokeObjectURL(url); // Clean up
+            document.body.removeChild(downloadLink);            
         })
         .catch(error => console.error('Error:', error));
     });
