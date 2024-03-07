@@ -28,11 +28,31 @@ module.exports = async (req, res) => {
     }
 
     try {
-      const pdfBoxMappings = await loadJSONData();
-	  console.log('pdfBoxMappings:', pdfBoxMappings);
-      const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
-      const pdfDoc = await PDFDocument.load(pdfBytes);
-      const page = pdfDoc.getPage(0);
+  // Load the font file
+  const fontBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'Arial.ttf'));
+
+  const pdfBoxMappings = await loadJSONData();
+  console.log('pdfBoxMappings:', pdfBoxMappings);
+
+  const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const page = pdfDoc.getPage(0);
+
+  // Load the font in the PDF document
+  const customFont = await pdfDoc.embedFont(fontBytes);
+
+  console.log('Form fields:', fields);
+  pdfBoxMappings.forEach(mapping => {
+    const content = fields[mapping.id];
+    if (content && typeof content === 'string') {
+      page.drawText(content, {
+        x: mapping.x,
+        y: mapping.y,
+        size: mapping.font.size,
+        font: customFont, // Add this line to use the custom font when drawing the text
+      });
+    }
+  });
 
 console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
