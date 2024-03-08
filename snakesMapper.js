@@ -12,8 +12,8 @@ async function addTextToPdf(pdfDoc, fields) {
 
 
   firstPage.drawText(text, {
-    x: 50,
-    y: 70,
+    x: 70,
+    y: 120,
     size: 16,
     font: helveticaFont,
     color: rgb(0.95, 0.1, 0.1),
