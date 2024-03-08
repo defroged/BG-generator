@@ -6,6 +6,11 @@ const { Storage } = require('@google-cloud/storage');
 const decodedCredentials = JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf8'));
 const fontkit = require('fontkit');
 
+const dpi = 72;
+function pixelsToPoints(value) {
+  return value * 72 / dpi;
+}
+
 const storage = new Storage({
   projectId: decodedCredentials.project_id,
   credentials: decodedCredentials,
@@ -36,23 +41,25 @@ console.log('Received Fields:', fields);
 
       const pdfBytes = await fs.readFile(path.join(process.cwd(), 'public', 'assets', 'snakesAndLaddersTemplate.pdf'));
       const pdfDoc = await PDFDocument.load(pdfBytes);
-      pdfDoc.registerFontkit(fontkit); // Add this line
+      pdfDoc.registerFontkit(fontkit); 
       const page = pdfDoc.getPage(0);
       const customFont = await pdfDoc.embedFont(fontBytes);
 
       console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
   const content = fields[mapping.id];
-  console.log('Content:', content);
   if (content && typeof content === 'string') {
+    const x = pixelsToPoints(mapping.x);
+    const y = pixelsToPoints(mapping.y);
+    const width = pixelsToPoints(mapping.width);
+    const height = pixelsToPoints(mapping.height);
+
     const textWidth = customFont.widthOfTextAtSize(content, mapping.font.size);
     const textHeight = customFont.heightAtSize(mapping.font.size);
-    const textBoxWidth = mapping.width;
-    const textBoxHeight = mapping.height;
-    
-    const newX = mapping.x + (textBoxWidth / 2) - (textWidth / 2);
-    const newY = mapping.y + (textBoxHeight / 2) - (textHeight / 2);
- 
+
+    const newX = x + (width / 2) - (textWidth / 2);
+    const newY = y + (height / 2) - (textHeight / 2);
+
     page.drawText(content, {
       x: newX,
       y: newY,
@@ -74,7 +81,7 @@ console.log('Received Fields:', fields);
 
       const signedUrlConfig = {
         action: 'read',
-        expires: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
+        expires: Date.now() + 12 * 60 * 60 * 1000, 
         contentDisposition: 'attachment; filename=customized_board_game.pdf',
       };
 
