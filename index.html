@@ -33,10 +33,15 @@
 			</div>
 			<div class="form-container">
     <h2>Customize Your Board Game</h2>
-    <div class="input-group">
+    <form id="customizationForm" action="/api/snakesLadders" method="POST" enctype="multipart/form-data">
+        <div class="input-fields">
+            <div class="input-group">
     <label for="boxes">Boxes:</label>
     <input type="text" id="boxes" name="boxes" placeholder="box1, box2, box3, ...">
 </div>
+        </div>
+        <button type="submit">Generate PDF</button>
+    </form>
 </div>
 
 
