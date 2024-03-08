@@ -33,7 +33,8 @@ module.exports = async (req, res) => {
       const firstPage = pages[0];
       const { width, height } = firstPage.getSize();
 
-      const text = fields['box1'];
+      const textArray = fields['box1'];
+const text = Array.isArray(textArray) && textArray.length > 0 ? textArray[0] : '';
 
       firstPage.drawText(text, {
         x: 55,
