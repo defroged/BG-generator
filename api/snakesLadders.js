@@ -34,7 +34,7 @@ console.log('Received Fields:', fields);
       const pdfBoxMappings = await loadJSONData();
       console.log('pdfBoxMappings:', pdfBoxMappings);
 
-      const pdfBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'snakesAndLaddersTemplate.pdf'));
+      const pdfBytes = await fs.readFile(path.join(process.cwd(), 'public', 'assets', 'snakesAndLaddersTemplate.pdf'));
       const pdfDoc = await PDFDocument.load(pdfBytes);
       pdfDoc.registerFontkit(fontkit); // Add this line
       const page = pdfDoc.getPage(0);
