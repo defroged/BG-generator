@@ -25,18 +25,33 @@ module.exports = async (req, res) => {
     console.log('Received Fields:', fields);
 
     try {
-      const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-      const pdfDoc = await PDFDocument.load(pdfBytes);
+  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+  const pdfDoc = await PDFDocument.load(pdfBytes);
 
-      await addTextToPdf(pdfDoc, fields);
+  await addTextToPdf(pdfDoc, fields);
 
-      const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+  const newPdfBytes = await pdfDoc.save();
 
-      res.status(200).json({ downloadUrl: downloadUrl[0] });
+  const randomKey = Date.now().toString();
+  const fileName = `${randomKey}.pdf`;
+  console.log('fileName:', fileName);
+  const remoteFile = bucket.file(fileName);
+  console.log('remoteFile:', remoteFile);
+  await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
 
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('An error occurred during PDF processing.');
-    }
+  const signedUrlConfig = {
+    action: 'read',
+    expires: Date.now() + 12 * 60 * 60 * 1000,
+    contentDisposition: 'attachment; filename=customized_board_game.pdf',
+  };
+
+  const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+
+  res.status(200).json({ downloadUrl: downloadUrl[0] });
+
+} catch (error) {
+  console.error(error);
+  res.status(500).send('An error occurred during PDF processing.');
+}
   });
 };
