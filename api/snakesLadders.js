@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
     }
 console.log('Received Fields:', fields);
     try {
-      const fontBytes = await fs.readFile(path.join(__dirname, '..', 'assets', 'Arial.ttf'));
+      const fontBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'Arial.ttf'));
 
       const pdfBoxMappings = await loadJSONData();
       console.log('pdfBoxMappings:', pdfBoxMappings);
