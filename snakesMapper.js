@@ -9,10 +9,11 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const textArray = fields['box1'];
   const text = Array.isArray(textArray) && textArray.length > 0 ? textArray[0] : '';
+  const marginBottom = 30;
 
   firstPage.drawText(text, {
     x: 20,
-    y: height - 20,
+    y: marginBottom,
     size: 16,
     font: helveticaFont,
     color: rgb(0.95, 0.1, 0.1),
