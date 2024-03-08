@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); 
         
         const formData = new FormData(form);
-		for (let pair of formData.entries()) {
-  console.log(pair[0] + ': ' + pair[1]);
-}
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
 
         fetch(form.action, {
             method: 'POST',
@@ -50,11 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const downloadUrl = json.downloadUrl; 
             const downloadLink = document.createElement('a');
             downloadLink.href = downloadUrl;
-            downloadLink.download = "customized_board_game.pdf"; 
+            // Remove the download attribute to prevent automatic download
+            // Set the target attribute to '_blank' to open in a new window/tab
+            downloadLink.target = '_blank';
             document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);            
+            downloadLink.click(); // This will now open the URL in a new window/tab instead of downloading
+            document.body.removeChild(downloadLink);
         })
         .catch(error => console.error('Error:', error));
     });
 });
+
