@@ -1,4 +1,4 @@
-const { rgb } = require('pdf-lib');
+const { rgb, StandardFonts } = require('pdf-lib');
 
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
