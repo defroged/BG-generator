@@ -1,50 +1,42 @@
 [
   {
-     "id": "box1",
-    "x": 147.5,  
-    "y": 396,    
-    "width": 300, 
-    "height": 100, 
+    "id": "box1",
+    "x": 50,
+    "y": 700,
+    "width": 50,
+    "height": 25,
     "font": {
-      "size": 24,   
-      "family": "Arial"
-    },
-    "scaling": "fit"
+      "size": 12
+    }
   },
   {
     "id": "box2",
-    "x": 230,
-    "y": 560,
-    "width": 100,
-    "height": 50,
+    "x": 110,
+    "y": 700,
+    "width": 50,
+    "height": 25,
     "font": {
-      "size": 12,
-      "family": "Arial"
-    },
-    "scaling": "fit"
+      "size": 12
+    }
   },
   {
     "id": "box3",
-    "x": 340,
-    "y": 560,
-    "width": 100,
-    "height": 50,
+    "x": 170,
+    "y": 700,
+    "width": 50,
+    "height": 25,
     "font": {
-      "size": 12,
-      "family": "Arial"
-    },
-    "scaling": "fit"
+      "size": 12
+    }
   },
   {
     "id": "box4",
-    "x": 450,
-    "y": 560,
-    "width": 100,
-    "height": 50,
+    "x": 230,
+    "y": 700,
+    "width": 50,
+    "height": 25,
     "font": {
-      "size": 12,
-      "family": "Arial"
-    },
-    "scaling": "fit"
+      "size": 12
+    }
   }
 ]

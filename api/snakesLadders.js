@@ -47,7 +47,8 @@ const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAnd
 
       console.log('Form fields:', fields);
       pdfBoxMappings.forEach(mapping => {
-  const content = fields[mapping.id];
+      const formFieldName = mapping.id;
+      const content = fields[formFieldName];
   if (content && typeof content === 'string') {
     const x = pixelsToPoints(mapping.x);
     const y = pixelsToPoints(mapping.y);
