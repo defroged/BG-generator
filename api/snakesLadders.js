@@ -1,4 +1,4 @@
-const { addTextToPdf } = require('./pdfTextMapper');
+const { addTextToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
