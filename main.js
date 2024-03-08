@@ -31,10 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         e.preventDefault(); 
         
-        const formData = new FormData(form);
-        for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
+        const boxesInput = document.getElementById('boxes');
+const boxValues = boxesInput.value.split(',').map(x => x.trim()).slice(0, 98);
+const formData = new FormData();
+for (let i = 0; i < boxValues.length; i++) {
+    formData.append(`box${i + 1}`, boxValues[i]);
+}
 
         fetch(form.action, {
             method: 'POST',
