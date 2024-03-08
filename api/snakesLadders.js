@@ -1,15 +1,9 @@
-const { PDFDocument } = require('pdf-lib');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
 const decodedCredentials = JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf8'));
-const fontkit = require('fontkit');
-
-const dpi = 72;
-function pixelsToPoints(value) {
-  return value * 72 / dpi;
-}
 
 const storage = new Storage({
   projectId: decodedCredentials.project_id,
@@ -17,11 +11,6 @@ const storage = new Storage({
 });
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
-
-async function loadJSONData() {
-  const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
-  return JSON.parse(data);
-}
 
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
@@ -32,57 +21,40 @@ module.exports = async (req, res) => {
       res.status(500).send('Error parsing form data.');
       return;
     }
-console.log('Received Fields:', fields);
+    console.log('Received Fields:', fields);
+
     try {
-      const fontBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'arial.ttf'));
-
-      const pdfBoxMappings = await loadJSONData().catch(error => console.log("Error in loading JSON data:", error));
-      console.log('pdfBoxMappings:', pdfBoxMappings);
-
-const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+      const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
       const pdfDoc = await PDFDocument.load(pdfBytes);
-      pdfDoc.registerFontkit(fontkit); 
-      const page = pdfDoc.getPage(0);
-      const customFont = await pdfDoc.embedFont(fontBytes);
 
-      console.log('Form fields:', fields);
-      pdfBoxMappings.forEach(mapping => {
-      const formFieldName = mapping.id;
-      const content = fields[formFieldName];
-  if (content && typeof content === 'string') {
-    const x = pixelsToPoints(mapping.x);
-    const y = pixelsToPoints(mapping.y);
-    const width = pixelsToPoints(mapping.width);
-    const height = pixelsToPoints(mapping.height);
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      
+      const pages = pdfDoc.getPages()
+      const firstPage = pages[0];
+      const { width, height } = firstPage.getSize();
 
-    const textWidth = customFont.widthOfTextAtSize(content, mapping.font.size);
-    const textHeight = customFont.heightAtSize(mapping.font.size);
+      const text = fields['box1'];
 
-    const newX = x + (width / 2) - (textWidth / 2);
-    const newY = y + (height / 2) - (textHeight / 2);
+      firstPage.drawText(text, {
+        x: 55,
+        y: height - 110,
+        size: 16,
+        font: helveticaFont,
+        color: rgb(0.95, 0.1, 0.1),
+      });
 
-    page.drawText(content, {
-      x: newX,
-      y: newY,
-      size: mapping.font.size,
-      font: customFont,
-    });
-  }
-});
-
-      const modifiedPdfBytes = await pdfDoc.save();
-      console.log('modifiedPdfBytes:', modifiedPdfBytes);
+      const newPdfBytes = await pdfDoc.save();
 
       const randomKey = Date.now().toString();
       const fileName = `${randomKey}.pdf`;
       console.log('fileName:', fileName);
       const remoteFile = bucket.file(fileName);
       console.log('remoteFile:', remoteFile);
-      await remoteFile.save(Buffer.from(modifiedPdfBytes), { contentType: 'application/pdf' });
+      await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
 
       const signedUrlConfig = {
         action: 'read',
-        expires: Date.now() + 12 * 60 * 60 * 1000, 
+        expires: Date.now() + 12 * 60 * 60 * 1000,
         contentDisposition: 'attachment; filename=customized_board_game.pdf',
       };
 
@@ -94,5 +66,5 @@ const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAnd
       console.error(error);
       res.status(500).send('An error occurred during PDF processing.');
     }
-  }); 
+  });
 };
