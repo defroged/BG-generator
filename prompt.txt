@@ -1,0 +1,207 @@
+I am making a web app that gets certain data from a user, like words and images, and creates a PDF from a template that is populated by the data from the user (or from other sources).
+Currently, I'm testing it with a Snakes and Ladders board game, where the words chosen will populate the board game template PDF file.
+I'm using Vercel for hosting and deploying.
+The template PDF file is in the 'assets' folder.
+I'm trying to get the script to actually write four test words from the front end form into the PDF file, but currently I only get the raw template PDF file with no added text.
+Here is the HTML form:
+<form id="customizationForm" action="/api/snakesLadders" method="POST" enctype="multipart/form-data">
+        <div class="input-fields">
+            <!-- Dynamically generate text inputs or file uploads -->
+            <div class="input-group"><label for="box1">Box 1:</label><input type="text" id="box1" name="box1"></div>
+            <div class="input-group"><label for="box2">Box 2:</label><input type="text" id="box2" name="box2"></div>
+			<div class="input-group"><label for="box3">Box 3:</label><input type="text" id="box3" name="box3"></div>
+			<div class="input-group"><label for="box4">Box 4:</label><input type="text" id="box4" name="box4"></div>
+            <!-- more inputs -->
+        </div>
+        <button type="submit">Generate PDF</button>
+    </form>
+	
+Here is the script for handling the form and PDF (part of the file 'main.js'):
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('customizationForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        
+        const formData = new FormData(form);
+		for (let pair of formData.entries()) {
+  console.log(pair[0] + ': ' + pair[1]);
+}
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if(response.ok) {
+                return response.json(); 
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(json => {
+            const downloadUrl = json.downloadUrl; 
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            downloadLink.download = "customized_board_game.pdf"; 
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);            
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+
+Here is the script 'snakesLadders.js:
+
+const { PDFDocument } = require('pdf-lib');
+const fs = require('fs').promises;
+const formidable = require('formidable');
+const path = require('path');
+const { Storage } = require('@google-cloud/storage');
+const decodedCredentials = JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf8'));
+const fontkit = require('fontkit');
+
+const dpi = 72;
+function pixelsToPoints(value) {
+  return value * 72 / dpi;
+}
+
+const storage = new Storage({
+  projectId: decodedCredentials.project_id,
+  credentials: decodedCredentials,
+});
+const bucketName = 'bg_pdf_bucket';
+const bucket = storage.bucket(bucketName);
+
+async function loadJSONData() {
+  const data = await fs.readFile(path.join(__dirname, '..', 'snakesMapping.json'), 'utf8');
+  return JSON.parse(data);
+}
+
+module.exports = async (req, res) => {
+  const form = new formidable.IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error parsing form data.');
+      return;
+    }
+console.log('Received Fields:', fields);
+    try {
+      const fontBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'arial.ttf'));
+
+      const pdfBoxMappings = await loadJSONData().catch(error => console.log("Error in loading JSON data:", error));
+      console.log('pdfBoxMappings:', pdfBoxMappings);
+
+const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+      pdfDoc.registerFontkit(fontkit); 
+      const page = pdfDoc.getPage(0);
+      const customFont = await pdfDoc.embedFont(fontBytes);
+
+      console.log('Form fields:', fields);
+      pdfBoxMappings.forEach(mapping => {
+  const content = fields[mapping.id];
+  if (content && typeof content === 'string') {
+    const x = pixelsToPoints(mapping.x);
+    const y = pixelsToPoints(mapping.y);
+    const width = pixelsToPoints(mapping.width);
+    const height = pixelsToPoints(mapping.height);
+
+    const textWidth = customFont.widthOfTextAtSize(content, mapping.font.size);
+    const textHeight = customFont.heightAtSize(mapping.font.size);
+
+    const newX = x + (width / 2) - (textWidth / 2);
+    const newY = y + (height / 2) - (textHeight / 2);
+
+    page.drawText(content, {
+      x: newX,
+      y: newY,
+      size: mapping.font.size,
+      font: customFont,
+    });
+  }
+});
+
+      const modifiedPdfBytes = await pdfDoc.save();
+      console.log('modifiedPdfBytes:', modifiedPdfBytes);
+
+      const randomKey = Date.now().toString();
+      const fileName = `${randomKey}.pdf`;
+      console.log('fileName:', fileName);
+      const remoteFile = bucket.file(fileName);
+      console.log('remoteFile:', remoteFile);
+      await remoteFile.save(Buffer.from(modifiedPdfBytes), { contentType: 'application/pdf' });
+
+      const signedUrlConfig = {
+        action: 'read',
+        expires: Date.now() + 12 * 60 * 60 * 1000, 
+        contentDisposition: 'attachment; filename=customized_board_game.pdf',
+      };
+
+      const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+
+      res.status(200).json({ downloadUrl: downloadUrl[0] });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('An error occurred during PDF processing.');
+    }
+  }); 
+};
+
+And here is the script 'snakesMapping.json':
+[
+  {
+    "id": "box1",
+    "x": 120,
+    "y": 560,
+    "width": 100,
+    "height": 50,
+    "font": {
+      "size": 12,
+      "family": "Arial"
+    },
+    "scaling": "fit"
+  },
+  {
+    "id": "box2",
+    "x": 230,
+    "y": 560,
+    "width": 100,
+    "height": 50,
+    "font": {
+      "size": 12,
+      "family": "Arial"
+    },
+    "scaling": "fit"
+  },
+  {
+    "id": "box3",
+    "x": 340,
+    "y": 560,
+    "width": 100,
+    "height": 50,
+    "font": {
+      "size": 12,
+      "family": "Arial"
+    },
+    "scaling": "fit"
+  },
+  {
+    "id": "box4",
+    "x": 450,
+    "y": 560,
+    "width": 100,
+    "height": 50,
+    "font": {
+      "size": 12,
+      "family": "Arial"
+    },
+    "scaling": "fit"
+  }
+]
+
+There are only four "boxes" for testing purposes, as I want to see if I am able to write to the PDF.

@@ -36,7 +36,7 @@ console.log('Received Fields:', fields);
     try {
       const fontBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'arial.ttf'));
 
-      const pdfBoxMappings = await loadJSONData();
+      const pdfBoxMappings = await loadJSONData().catch(error => console.log("Error in loading JSON data:", error));
       console.log('pdfBoxMappings:', pdfBoxMappings);
 
 const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));

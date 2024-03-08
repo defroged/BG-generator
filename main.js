@@ -29,13 +29,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('customizationForm');
     
     form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent the default form submission
+        e.preventDefault(); 
         
         const formData = new FormData(form);
-		console.log('Form Data:', formData);
-
-        // Here, you might want to loop through formData and perform any necessary preprocessing
-        // For now, we'll just send it as is
+		for (let pair of formData.entries()) {
+  console.log(pair[0] + ': ' + pair[1]);
+}
 
         fetch(form.action, {
             method: 'POST',
@@ -43,16 +42,15 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if(response.ok) {
-                return response.json(); // Read the JSON object from the response
+                return response.json(); 
             }
             throw new Error('Network response was not ok.');
         })
         .then(json => {
-            const downloadUrl = json.downloadUrl; // Get the download URL from the JSON response
-            // Create a link to download the PDF
+            const downloadUrl = json.downloadUrl; 
             const downloadLink = document.createElement('a');
             downloadLink.href = downloadUrl;
-            downloadLink.download = "customized_board_game.pdf"; // Set the file name
+            downloadLink.download = "customized_board_game.pdf"; 
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);            
