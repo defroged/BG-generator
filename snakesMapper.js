@@ -11,8 +11,8 @@ async function addTextToPdf(pdfDoc, fields) {
   const text = Array.isArray(textArray) && textArray.length > 0 ? textArray[0] : '';
 
   firstPage.drawText(text, {
-    x: 5,
-    y: height - 5,
+    x: 20,
+    y: height 20,
     size: 16,
     font: helveticaFont,
     color: rgb(0.95, 0.1, 0.1),
