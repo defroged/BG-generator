@@ -3,16 +3,20 @@ const { rgb, StandardFonts } = require('pdf-lib');
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  const pages = pdfDoc.getPages();
+  const pages = pdfDoc.getPages()
   const firstPage = pages[0];
   const { width, height } = firstPage.getSize();
 
+  // Get all input fields starting with "box"
+  const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
+
+  // Define an array of positions for each input field (x, y)
   const positions = [
     { x: 160, y: 20 },
     { x: 250, y: 20 },
     { x: 160, y: 40 },
     { x: 250, y: 40 },
-    // Add more custom positions if necessary
+    // Add more positions if necessary
   ];
 
   boxKeys.forEach((boxKey, index) => {
