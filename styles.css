@@ -168,3 +168,6 @@ text-align: center;
     font-weight: normal !important;
 	}
 	
+#addInputBtn {
+float: left;
+}

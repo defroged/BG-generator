@@ -83,3 +83,14 @@ function addNewInput() {
     inputFields.appendChild(newInputGroup);
 }
 
+addInputBtn.addEventListener('click', addNewInput);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const focusedElement = document.activeElement;
+    if (focusedElement.tagName === 'INPUT' && focusedElement.parentElement.parentElement.lastElementChild === focusedElement.parentElement) {
+      addNewInput();
+    }
+  }
+});
