@@ -16,8 +16,12 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 230, y: 20 },
     { x: 300, y: 20 },
     { x: 370, y: 20 },
-    // Add more positions if necessary
-  ];
+    { x: 440, y: 20 },
+    { x: 510, y: 20 },
+    { x: 580, y: 20 },
+    { x: 650, y: 20 },
+    { x: 720, y: 20 },
+];
 
   boxKeys.forEach((boxKey, index) => {
     const inputTextArray = fields[boxKey];
