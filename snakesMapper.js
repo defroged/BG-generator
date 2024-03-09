@@ -7,16 +7,24 @@ async function addTextToPdf(pdfDoc, fields) {
   const firstPage = pages[0];
   const { width, height } = firstPage.getSize();
 
-  const textArray = fields['box1'];
-  const text = Array.isArray(textArray) && textArray.length > 0 ? textArray[0] : '';
+  // Get all input fields starting with "box"
+  const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
+  // Calculate x and y positions
+  const startY = 20;
+  const lineHeight = 20;
+  const offsetX = 160;
 
-  firstPage.drawText(text, {
-    x: 160,
-    y: 20,
-    size: 16,
-    font: helveticaFont,
-    color: rgb(0.95, 0.1, 0.1),
+  boxKeys.forEach((boxKey, index) => {
+    const inputText = fields[boxKey];
+
+    firstPage.drawText(inputText, {
+      x: offsetX,
+      y: startY + index * lineHeight,
+      size: 16,
+      font: helveticaFont,
+      color: rgb(0.95, 0.1, 0.1),
+    });
   });
 }
 
