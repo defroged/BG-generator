@@ -16,7 +16,8 @@ async function addTextToPdf(pdfDoc, fields) {
   const offsetX = 160;
 
   boxKeys.forEach((boxKey, index) => {
-    const inputText = fields[boxKey];
+    const inputTextArray = fields[boxKey];
+    const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
 
     firstPage.drawText(inputText, {
       x: offsetX,
@@ -25,7 +26,7 @@ async function addTextToPdf(pdfDoc, fields) {
       font: helveticaFont,
       color: rgb(0.95, 0.1, 0.1),
     });
-  });
+});
 }
 
 module.exports = {
