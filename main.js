@@ -91,6 +91,13 @@ document.addEventListener('keydown', (e) => {
     const focusedElement = document.activeElement;
     if (focusedElement.tagName === 'INPUT' && focusedElement.parentElement.parentElement.lastElementChild === focusedElement.parentElement) {
       addNewInput();
+
+      // Get a reference to the new input field
+      const inputFields = document.querySelector('.input-fields');
+      const lastInput = inputFields.lastElementChild.querySelector('input');
+
+      // Focus on the new input field
+      lastInput.focus();
     }
   }
 });
