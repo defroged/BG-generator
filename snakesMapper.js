@@ -30,7 +30,8 @@ async function addTextToPdf(pdfDoc, fields) {
 
   for (let i = 0; i < boxKeys.length; i++) {
     const key = boxKeys[i];
-    const text = fields[key];
+    const textArray = fields[key];
+const text = Array.isArray(textArray) && textArray.length > 0 ? textArray[0] : '';
 
     firstPage.drawText(text, {
       x: boxCoords[i * 2],       // e.g., x1 for i=0; x2 for i=1, ...
