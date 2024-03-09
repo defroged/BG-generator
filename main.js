@@ -61,3 +61,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+const addInputBtn = document.getElementById('addInputBtn');
+function addNewInput() {
+    const inputFields = document.querySelector('.input-fields');
+    const inputCount = inputFields.childElementCount;
+
+    const newInputGroup = document.createElement('div');
+    newInputGroup.classList.add('input-group');
+
+    const newInputLabel = document.createElement('label');
+    newInputLabel.textContent = `Box ${inputCount + 1}:`;
+    newInputLabel.htmlFor = `box${inputCount + 1}`;
+
+    const newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.id = `box${inputCount + 1}`;
+    newInput.name = `box${inputCount + 1}`;
+
+    newInputGroup.appendChild(newInputLabel);
+    newInputGroup.appendChild(newInput);
+    inputFields.appendChild(newInputGroup);
+}
+
