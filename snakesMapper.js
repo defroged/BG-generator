@@ -13,9 +13,9 @@ async function addTextToPdf(pdfDoc, fields) {
   // Define an array of positions for each input field (x, y)
   const positions = [
     { x: 160, y: 20 },
-    { x: 240, y: 20 },
-    { x: 320, y: 20 },
-    { x: 400, y: 20 },
+    { x: 230, y: 20 },
+    { x: 300, y: 20 },
+    { x: 370, y: 20 },
     // Add more positions if necessary
   ];
 
