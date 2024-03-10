@@ -9,7 +9,7 @@ const { rgb, StandardFonts } = require('pdf-lib');
   // Default: center align
   const spaceWidth = (maxWidth - lineWidth) / 2;
   return ' '.repeat(spaceWidth) + text;
-}
+
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
