@@ -1,11 +1,6 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
-function alignText(text, lineWidth, maxWidth, alignment = 'center') {
-  if (alignment === 'left') {
-    return text;
-  }
-
   if (alignment === 'right') {
     const spaceWidth = maxWidth - lineWidth;
     return ' '.repeat(spaceWidth) + text;
@@ -40,8 +35,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
         }
       }
 
-      const formattedLine = alignText(currentLineWords.join(' '), currentLineWidth, maxWidth);
-lines.push(formattedLine);
+      lines.push(currentLineWords.join(' '));
 
       if ((lines.length + 1) * font.heightAtSize(fontSize) > maxHeight) {
         break;
@@ -104,14 +98,16 @@ const lineHeight = helveticaFont.heightAtSize(fontSize);
 let lineY = position.y + (maxHeight - lines.length * lineHeight * lineSpacing) / 2;
 
 lines.forEach((line) => {
-  firstPage.drawText(line, {
-    x: position.x,
-    y: lineY,
-    size: fontSize,
-    font: helveticaFont,
-    color: rgb(0.95, 0.1, 0.1),
-  });
-  lineY -= lineHeight * lineSpacing;
+  const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
+const lineX = position.x + (maxWidth - lineWidth) / 2;
+firstPage.drawText(line, {
+  x: lineX,
+  y: lineY,
+  size: fontSize,
+  font: helveticaFont,
+  color: rgb(0.95, 0.1, 0.1),
+});
+lineY -= lineHeight * lineSpacing;
 });
   });
 }
