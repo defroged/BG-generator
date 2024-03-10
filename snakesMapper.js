@@ -1,6 +1,21 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
+function alignText(text, lineWidth, maxWidth, alignment = 'center') {
+  if (alignment === 'left') {
+    return text;
+  }
+
+  if (alignment === 'right') {
+    const spaceWidth = maxWidth - lineWidth;
+    return ' '.repeat(spaceWidth) + text;
+  }
+
+  // Default: center align
+  const spaceWidth = (maxWidth - lineWidth) / 2;
+  return ' '.repeat(spaceWidth) + text;
+}
+
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
   let fontSize = defaultFontSize;
@@ -25,7 +40,8 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
         }
       }
 
-      lines.push(currentLineWords.join(' '));
+      const formattedLine = alignText(currentLineWords.join(' '), currentLineWidth, maxWidth);
+lines.push(formattedLine);
 
       if ((lines.length + 1) * font.heightAtSize(fontSize) > maxHeight) {
         break;
@@ -85,7 +101,7 @@ const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth,
 const lineSpacing = 1.2;
 const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-let lineY = position.y;
+let lineY = position.y + (maxHeight - lines.length * lineHeight * lineSpacing) / 2;
 
 lines.forEach((line) => {
   firstPage.drawText(line, {
