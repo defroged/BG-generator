@@ -110,7 +110,7 @@ firstPage.drawText(line, {
 lineY -= lineHeight * lineSpacing;
 });
   });
-}
+
 
 module.exports = {
   addTextToPdf
