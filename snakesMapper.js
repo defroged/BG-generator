@@ -1,16 +1,6 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
-  if (alignment === 'right') {
-    const spaceWidth = maxWidth - lineWidth;
-    return ' '.repeat(spaceWidth) + text;
-  }
-
-  // Default: center align
-  const spaceWidth = (maxWidth - lineWidth) / 2;
-  return ' '.repeat(spaceWidth) + text;
-
-
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
   let fontSize = defaultFontSize;
@@ -55,7 +45,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  const pages = pdfDoc.getPages()
+  const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   const { width, height } = firstPage.getSize();
 
@@ -71,7 +61,7 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 580, y: 20 },
     { x: 650, y: 20 },
     { x: 720, y: 20 },
-	{ x: 90, y: 90 },
+    { x: 90, y: 90 },
     { x: 160, y: 90 },
     { x: 230, y: 90 },
     { x: 300, y: 90 },
@@ -80,37 +70,34 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 510, y: 90 },
     { x: 580, y: 90 },
     { x: 650, y: 90 },
-];
+  ];
 
   boxKeys.forEach((boxKey, index) => {
     const inputTextArray = fields[boxKey];
     const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
     const position = positions[index];
+    const maxWidth = 70;
+    const maxHeight = 70;
+    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+    const lineSpacing = 1.2;
+    const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    // Set maxWidth and maxHeight for a 70x70 point box
-const maxWidth = 70;
-const maxHeight = 70;
+    let lineY = position.y + (maxHeight - lines.length * lineHeight * lineSpacing) / 2;
 
-const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
-const lineSpacing = 1.2;
-const lineHeight = helveticaFont.heightAtSize(fontSize);
-
-let lineY = position.y + (maxHeight - lines.length * lineHeight * lineSpacing) / 2;
-
-lines.forEach((line) => {
-  const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
-const lineX = position.x + (maxWidth - lineWidth) / 2;
-firstPage.drawText(line, {
-  x: lineX,
-  y: lineY,
-  size: fontSize,
-  font: helveticaFont,
-  color: rgb(0.95, 0.1, 0.1),
-});
-lineY -= lineHeight * lineSpacing;
-});
+    lines.forEach((line) => {
+      const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
+      const lineX = position.x + (maxWidth - lineWidth) / 2;
+      firstPage.drawText(line, {
+        x: lineX,
+        y: lineY,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(0.95, 0.1, 0.1),
+      });
+      lineY -= lineHeight * lineSpacing;
+    });
   });
-
+}
 
 module.exports = {
   addTextToPdf
