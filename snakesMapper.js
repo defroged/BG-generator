@@ -82,11 +82,21 @@ async function addTextToPdf(pdfDoc, fields) {
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    let lineY = position.y + (maxHeight - lines.length * lineHeight * lineSpacing) / 2;
+    let startY;
+    if (lines.length === 1) {
+      // Center the text vertically for single-line text
+      startY = position.y + (maxHeight - lineHeight) / 2;
+    } else {
+      // Start from the top for multi-line text
+      startY = position.y + maxHeight - lineHeight;
+    }
 
-    lines.forEach((line) => {
+    lines.forEach((line, i) => {
       const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
       const lineX = position.x + (maxWidth - lineWidth) / 2;
+      // Adjust Y position for each subsequent line
+      const lineY = startY - i * lineHeight * lineSpacing;
+
       firstPage.drawText(line, {
         x: lineX,
         y: lineY,
@@ -94,7 +104,6 @@ async function addTextToPdf(pdfDoc, fields) {
         font: helveticaFont,
         color: rgb(0.95, 0.1, 0.1),
       });
-      lineY -= lineHeight * lineSpacing;
     });
   });
 }
