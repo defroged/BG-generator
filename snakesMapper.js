@@ -52,24 +52,24 @@ async function addTextToPdf(pdfDoc, fields) {
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
   const positions = [
-    { x: 160, y: 20 },
-    { x: 230, y: 20 },
-    { x: 300, y: 20 },
-    { x: 370, y: 20 },
-    { x: 440, y: 20 },
-    { x: 510, y: 20 },
-    { x: 580, y: 20 },
-    { x: 650, y: 20 },
-    { x: 720, y: 20 },
-    { x: 90, y: 90 },
-    { x: 160, y: 90 },
-    { x: 230, y: 90 },
-    { x: 300, y: 90 },
-    { x: 370, y: 90 },
-    { x: 440, y: 90 },
-    { x: 510, y: 90 },
-    { x: 580, y: 90 },
-    { x: 650, y: 90 },
+    { x: 140, y: 20 },
+    { x: 210, y: 20 },
+    { x: 280, y: 20 },
+    { x: 350, y: 20 },
+    { x: 420, y: 20 },
+    { x: 490, y: 20 },
+    { x: 560, y: 20 },
+    { x: 630, y: 20 },
+    { x: 700, y: 20 },
+    { x: 70, y: 90 },
+    { x: 140, y: 90 },
+    { x: 210, y: 90 },
+    { x: 280, y: 90 },
+    { x: 350, y: 90 },
+    { x: 420, y: 90 },
+    { x: 490, y: 90 },
+    { x: 560, y: 90 },
+    { x: 630, y: 90 },
   ];
 
   boxKeys.forEach((boxKey, index) => {
@@ -77,7 +77,7 @@ async function addTextToPdf(pdfDoc, fields) {
     const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
     const position = positions[index];
     const maxWidth = 70;
-    const maxHeight = 70;
+    const maxHeight = 60;
     const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
