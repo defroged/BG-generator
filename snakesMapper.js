@@ -72,7 +72,7 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 630, y: 70 },
   ];
 // Stroke settings
-  const strokeOffsets = [1, -1]; // Adjust the offset for the stroke effect
+  const strokeOffset = 1; // Adjust the offset for the stroke effect
   const strokeOpacity = 0.5; // Adjust the opacity for the stroke
 
   boxKeys.forEach((boxKey, index) => {
@@ -98,17 +98,15 @@ async function addTextToPdf(pdfDoc, fields) {
       const lineY = startY - i * lineHeight * lineSpacing;
 
       // Draw the stroke by rendering the text multiple times with an offset
-      strokeOffsets.forEach(offsetX => {
-        strokeOffsets.forEach(offsetY => {
-          // Creating a denser pattern around the text for a thicker stroke
-          for (let dx = offsetX; dx <= Math.abs(offsetX); dx += 0.5) {
-            for (let dy = offsetY; dy <= Math.abs(offsetY); dy += 0.5) {
-              firstPage.drawText(line, {
-                x: lineX + dx,
-                y: lineY + dy,
-                size: fontSize,
-                font: helveticaFont,
-                color: rgb(1, 1, 1, strokeOpacity),  // Semi-transparent white
+      const offsets = [-strokeOffset, strokeOffset];
+      offsets.forEach(dx => {
+        offsets.forEach(dy => {
+          firstPage.drawText(line, {
+            x: lineX + dx,
+            y: lineY + dy,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(1, 1, 1, strokeOpacity), // Semi-transparent white
           });
         });
       });
