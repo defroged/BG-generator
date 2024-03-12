@@ -51,26 +51,29 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
-  const positions = [
-  { x: 150, y: 0 },
-  { x: 220, y: 0 },
-  { x: 290, y: 0 },
-  { x: 360, y: 0 },
-  { x: 430, y: 0 },
-  { x: 500, y: 0 },
-  { x: 570, y: 0 },
-  { x: 640, y: 0 },
-  { x: 710, y: 0 },
-  { x: 80, y: 60 },
-  { x: 150, y: 60 },
-  { x: 220, y: 60 },
-  { x: 290, y: 60 },
-  { x: 360, y: 60 },
-  { x: 430, y: 60 },
-  { x: 500, y: 60 },
-  { x: 570, y: 60 },
-  { x: 640, y: 60 },
+  const xOffset = 10;
+const positions = [
+  { x: 140 + xOffset, y: 0 },
+  { x: 210, y: 0 },
+  { x: 280, y: 0 },
+  { x: 350, y: 0 },
+  { x: 420, y: 0 },
+  { x: 490, y: 0 },
+  { x: 560, y: 0 },
+  { x: 630, y: 0 },
+  { x: 700, y: 0 },
+  { x: 70, y: 60 },
+  { x: 140, y: 60 },
+  { x: 210, y: 60 },
+  { x: 280, y: 60 },
+  { x: 350, y: 60 },
+  { x: 420, y: 60 },
+  { x: 490, y: 60 },
+  { x: 560, y: 60 },
+  { x: 630, y: 60 },
 ];
+
+
 // Stroke settings
   const strokeOffset = 0.8; // Adjust the offset for the stroke effect
   const strokeOpacity = 0.5; // Adjust the opacity for the stroke
