@@ -51,27 +51,26 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
-  const xOffset = 20;
-const positions = [
-  { x: 140 + xOffset, y: 0 },
-  { x: 210, y: 0 },
-  { x: 280, y: 0 },
-  { x: 350, y: 0 },
-  { x: 420, y: 0 },
-  { x: 490, y: 0 },
-  { x: 560, y: 0 },
-  { x: 630, y: 0 },
-  { x: 700, y: 0 },
-  { x: 70, y: 60 },
-  { x: 140, y: 60 },
-  { x: 210, y: 60 },
-  { x: 280, y: 60 },
-  { x: 350, y: 60 },
-  { x: 420, y: 60 },
-  { x: 490, y: 60 },
-  { x: 560, y: 60 },
-  { x: 630, y: 60 },
-];
+  const positions = [
+    { x: 140, y: 0 },
+    { x: 210, y: 0 },
+    { x: 280, y: 0 },
+    { x: 350, y: 0 },
+    { x: 420, y: 0 },
+    { x: 490, y: 0 },
+    { x: 560, y: 0 },
+    { x: 630, y: 0 },
+    { x: 700, y: 0 },
+    { x: 70, y: 60 },
+    { x: 140, y: 60 },
+    { x: 210, y: 60 },
+    { x: 280, y: 60 },
+    { x: 350, y: 60 },
+    { x: 420, y: 60 },
+    { x: 490, y: 60 },
+    { x: 560, y: 60 },
+    { x: 630, y: 60 },
+  ];
 
 
 // Stroke settings
