@@ -70,6 +70,7 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 500, y: 60 },
     { x: 570, y: 60 },
     { x: 640, y: 60 },
+	{ x: 710, y: 60 },
   ];
 
 
