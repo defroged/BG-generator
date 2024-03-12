@@ -95,34 +95,41 @@ const positions = [
       startY = position.y + maxHeight - lineHeight;
     }
 
-    lines.forEach((line, i) => {
-      const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
-      const lineX = position.x + (maxWidth - lineWidth) / 2;
-      const lineY = startY - i * lineHeight * lineSpacing;
+    const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
+  return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
+      ? currentIndex
+      : maxIndex;
+}, 0);
 
-      // Draw the stroke by rendering the text multiple times with an offset
-      const offsets = [-strokeOffset, strokeOffset];
-      offsets.forEach(dx => {
-        offsets.forEach(dy => {
-          firstPage.drawText(line, {
-            x: lineX + dx,
-            y: lineY + dy,
-            size: fontSize,
-            font: helveticaFont,
-            color: rgb(1, 1, 1, strokeOpacity), // Semi-transparent white
-          });
-        });
-      });
+const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
+const lineX = position.x + (maxWidth - longestLineWidth) / 2;
 
-      // Draw the main text on top
+lines.forEach((line, i) => {
+  const lineY = startY - i * lineHeight * lineSpacing;
+
+  // Draw the stroke by rendering the text multiple times with an offset
+  const offsets = [-strokeOffset, strokeOffset];
+  offsets.forEach(dx => {
+    offsets.forEach(dy => {
       firstPage.drawText(line, {
-        x: lineX,
-        y: lineY,
+        x: lineX + dx,
+        y: lineY + dy,
         size: fontSize,
         font: helveticaFont,
-        color: rgb(0.25, 0.25, 0.25),
+        color: rgb(1, 1, 1, strokeOpacity), // Semi-transparent white
       });
     });
+  });
+
+  // Draw the main text on top
+  firstPage.drawText(line, {
+    x: lineX,
+    y: lineY,
+    size: fontSize,
+    font: helveticaFont,
+    color: rgb(0.25, 0.25, 0.25),
+  });
+});
   });
 }
 
