@@ -71,6 +71,9 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 560, y: 70 },
     { x: 630, y: 70 },
   ];
+// Stroke settings
+  const strokeOffset = 0.5; // Adjust the offset for the stroke effect
+  const strokeOpacity = 0.5; // Adjust the opacity for the stroke
 
   boxKeys.forEach((boxKey, index) => {
     const inputTextArray = fields[boxKey];
@@ -84,25 +87,37 @@ async function addTextToPdf(pdfDoc, fields) {
 
     let startY;
     if (lines.length === 1) {
-      // Center the text vertically for single-line text
       startY = position.y + (maxHeight - lineHeight) / 2;
     } else {
-      // Start from the top for multi-line text
       startY = position.y + maxHeight - lineHeight;
     }
 
     lines.forEach((line, i) => {
       const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
       const lineX = position.x + (maxWidth - lineWidth) / 2;
-      // Adjust Y position for each subsequent line
       const lineY = startY - i * lineHeight * lineSpacing;
 
+      // Draw the stroke by rendering the text multiple times with an offset
+      const offsets = [-strokeOffset, strokeOffset];
+      offsets.forEach(dx => {
+        offsets.forEach(dy => {
+          firstPage.drawText(line, {
+            x: lineX + dx,
+            y: lineY + dy,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(1, 1, 1, strokeOpacity), // Semi-transparent white
+          });
+        });
+      });
+
+      // Draw the main text on top
       firstPage.drawText(line, {
         x: lineX,
         y: lineY,
         size: fontSize,
         font: helveticaFont,
-        color: rgb(0.95, 0.1, 0.1),
+        color: rgb(0.95, 0.1, 0.1), // Main text color
       });
     });
   });
