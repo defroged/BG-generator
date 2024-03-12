@@ -51,7 +51,7 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
-  const xOffset = 10;
+  const xOffset = 8;
 const positions = [
   { x: 140 + xOffset, y: 0 },
   { x: 210, y: 0 },
