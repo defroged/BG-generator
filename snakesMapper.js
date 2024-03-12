@@ -117,7 +117,7 @@ async function addTextToPdf(pdfDoc, fields) {
         y: lineY,
         size: fontSize,
         font: helveticaFont,
-        color: rgb(0.95, 0.1, 0.1), // Main text color
+        color: rgb(0.25, 0.25, 0.25),
       });
     });
   });
