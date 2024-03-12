@@ -72,32 +72,37 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 630, y: 60 },
   ];
 // Stroke settings
-  const strokeOffset = 0.8; // Adjust the offset for the stroke effect
-  const strokeOpacity = 0.5; // Adjust the opacity for the stroke
+  const strokeOffset = 0.8; 
+  const strokeOpacity = 0.5; 
 
   boxKeys.forEach((boxKey, index) => {
     const inputTextArray = fields[boxKey];
     const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
     const position = positions[index];
-    const maxWidth = 70;
-    const maxHeight = 60;
+    const maxWidth = 70;  // Maximum width of text box, adjust if needed
+    const maxHeight = 60; // Maximum height of text box, adjust if needed
+
+    // Fit the text to the box using the fitTextToBox function
     const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
     const lineSpacing = 1.2;
-    const lineHeight = helveticaFont.heightAtSize(fontSize);
+    const lineHeight = helveticaFont.heightAtSize(fontSize) + helveticaFont.descentAtSize(fontSize);
 
     let startY;
     if (lines.length === 1) {
+      // Center single line of text vertically
       startY = position.y + (maxHeight - lineHeight) / 2;
     } else {
+      // Align the first line of text to the top of the box
       startY = position.y + maxHeight - lineHeight;
     }
 
+    // Draw each line of text
     lines.forEach((line, i) => {
       const lineWidth = helveticaFont.widthOfTextAtSize(line, fontSize);
-      const lineX = position.x + (maxWidth - lineWidth) / 2;
-      const lineY = startY - i * lineHeight * lineSpacing;
+      const lineX = position.x + (maxWidth - lineWidth) / 2; // Center text horizontally
+      const lineY = startY - i * lineHeight * lineSpacing; // Position text vertically
 
-      // Draw the stroke by rendering the text multiple times with an offset
+      // Draw text outlines for stroke effect
       const offsets = [-strokeOffset, strokeOffset];
       offsets.forEach(dx => {
         offsets.forEach(dy => {
@@ -106,12 +111,12 @@ async function addTextToPdf(pdfDoc, fields) {
             y: lineY + dy,
             size: fontSize,
             font: helveticaFont,
-            color: rgb(1, 1, 1, strokeOpacity), // Semi-transparent white
+            color: rgb(1, 1, 1, strokeOpacity),
           });
         });
       });
 
-      // Draw the main text on top
+      // Draw the actual text
       firstPage.drawText(line, {
         x: lineX,
         y: lineY,
