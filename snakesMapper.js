@@ -62,17 +62,17 @@ async function addTextToPdf(pdfDoc, fields) {
     { x: 630, y: 0 },
     { x: 700, y: 0 },
     { x: 70, y: 70 },
-    { x: 140, y: 70 },
-    { x: 210, y: 70 },
-    { x: 280, y: 70 },
-    { x: 350, y: 70 },
-    { x: 420, y: 70 },
-    { x: 490, y: 70 },
-    { x: 560, y: 70 },
-    { x: 630, y: 70 },
+    { x: 140, y: 60 },
+    { x: 210, y: 60 },
+    { x: 280, y: 60 },
+    { x: 350, y: 60 },
+    { x: 420, y: 60 },
+    { x: 490, y: 60 },
+    { x: 560, y: 60 },
+    { x: 630, y: 60 },
   ];
 // Stroke settings
-  const strokeOffset = 1; // Adjust the offset for the stroke effect
+  const strokeOffset = 0.8; // Adjust the offset for the stroke effect
   const strokeOpacity = 0.5; // Adjust the opacity for the stroke
 
   boxKeys.forEach((boxKey, index) => {
