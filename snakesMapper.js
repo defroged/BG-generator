@@ -223,7 +223,7 @@ if (lines.length === 1) {
         y: lineY,
         size: fontSize,
         font: helveticaFont,
-        color: rgb(0.25, 0.25, 0.25),
+        color: rgb(30, 30, 30),
       });
     });
   });
