@@ -173,8 +173,8 @@ async function addTextToPdf(pdfDoc, fields) {
     const position = positions[randomIndex];
     const maxWidth = 70;
     const maxHeight = 60;
-    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
-    const lineSpacing = 1.2;
+    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 15, maxWidth, maxHeight);
+    const lineSpacing = 1.0;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
     
