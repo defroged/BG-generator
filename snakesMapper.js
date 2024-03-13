@@ -183,7 +183,7 @@ if (lines.length === 1) {
   startY = position.y + (maxHeight - lineHeight) / 2;
 } else {
   const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - 10 - lineHeight;
+  startY = position.y + (maxHeight + totalTextHeight) / 2 - 17 - lineHeight;
 }
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
