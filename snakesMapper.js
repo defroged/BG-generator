@@ -177,12 +177,13 @@ async function addTextToPdf(pdfDoc, fields) {
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    let startY;
-    if (lines.length === 1) {
-      startY = position.y + (maxHeight - lineHeight) / 2;
-    } else {
-      startY = position.y + maxHeight - lineHeight;
-    }
+    
+if (lines.length === 1) {
+  startY = position.y + (maxHeight - lineHeight) / 2;
+} else {
+  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+  startY = position.y + maxHeight - (maxHeight - totalTextHeight) / 2 - lineHeight;
+}
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
       return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
