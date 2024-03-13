@@ -6,6 +6,9 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let fontSize = defaultFontSize;
   let words, currentLineWords, currentLineWidth, potentialLineWidth;
 
+  const numberOfLines = text.split('\n').length;
+  const maxFontSize = numberOfLines === 4 ? defaultFontSize - 2 : defaultFontSize;
+
   while (fontSize > 1) {
     lines = [];
     words = text.split(' ');
@@ -36,7 +39,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
       return { fontSize, lines };
     }
 
-    fontSize--;
+    fontSize = Math.min(maxFontSize, fontSize - 1);
   }
 
   return { fontSize, lines: [text] };
