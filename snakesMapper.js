@@ -178,12 +178,21 @@ async function addTextToPdf(pdfDoc, fields) {
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
     
+function calculateYOffset(linesCount) {
+  if (linesCount <= 4) {
+    return 17;
+  } else {
+    return 17 + (linesCount - 4) * 7;
+  }
+}
+
 let startY;
 if (lines.length === 1) {
   startY = position.y + (maxHeight - lineHeight) / 2;
 } else {
   const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - 17 - lineHeight;
+  const yOffset = calculateYOffset(lines.length);
+  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
 }
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
