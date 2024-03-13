@@ -62,15 +62,15 @@ async function addTextToPdf(pdfDoc, fields) {
   }
 
   const positions = [
-    { x: 140, y: 7 }, // 1
-    { x: 210, y: 7 }, // 2
-    { x: 280, y: 7 }, // 3
-    { x: 350, y: 7 }, // 4
-    { x: 430, y: 7 }, // 5
-    { x: 495, y: 7 }, // 6
-    { x: 565, y: 7 }, // 7
-    { x: 640, y: 7 }, // 8
-    { x: 710, y: 7 }, // 9
+    { x: 140, y: 0 }, // 1
+    { x: 210, y: 0 }, // 2
+    { x: 280, y: 0 }, // 3
+    { x: 350, y: 0 }, // 4
+    { x: 430, y: 0 }, // 5
+    { x: 495, y: 0 }, // 6
+    { x: 565, y: 0 }, // 7
+    { x: 640, y: 0 }, // 8
+    { x: 710, y: 0 }, // 9
     { x: 70, y: 60 }, // 10
     { x: 140, y: 60 }, // 11
     { x: 210, y: 60 }, // 12
@@ -182,7 +182,7 @@ function calculateYOffset(linesCount) {
   if (linesCount <= 4) {
     return 17;
   } else {
-    return 17 + (linesCount - 4) * 12;
+    return 17 + (linesCount - 4) * 7;
   }
 }
 
