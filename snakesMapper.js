@@ -51,6 +51,16 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
+  const userInputTexts = boxKeys.map((boxKey) => {
+    const inputTextArray = fields[boxKey];
+    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+  });
+
+  const fillTexts = [];
+  for (let i = 0; i < 98; i++) {
+    fillTexts[i] = userInputTexts[i % userInputTexts.length];
+  }
+
   const positions = [
     { x: 140, y: 0 }, // 1
     { x: 210, y: 0 }, // 2
@@ -152,18 +162,14 @@ async function addTextToPdf(pdfDoc, fields) {
 	{ x: 640, y: 540 }, // 98
   ];
 
-  // Get all box indices, shuffle them, and get the required count of indices
-  const numOfBoxes = boxKeys.length;
-  const boxIndices = Array.from({ length: 98 }, (_, i) => i); // Creates an array of indices [0, 1, 2, ... , 97]
+   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
   const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
-  const randomIndices = shuffledIndices.slice(0, numOfBoxes);
 
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-  randomIndices.forEach((randomIndex, index) => {
-    const inputTextArray = fields[boxKeys[index]];
-    const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+  shuffledIndices.forEach((randomIndex, index) => {
+    const inputText = fillTexts[index];
     const position = positions[randomIndex];
     const maxWidth = 70;
     const maxHeight = 60;
