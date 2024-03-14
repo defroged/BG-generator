@@ -126,7 +126,7 @@ async function addTextToPdf(pdfDoc, fields) {
   const { width, height } = firstPage.getSize();
 
   const boxKeys = Object.keys(fields).filter((key) => key.startsWith('box') || key.startsWith('image'));
-  const userInputContents = boxKeys.map((boxKey) => fields[boxKey] || '');
+  const userInputContents = boxKeys.map((boxKey) => fields[boxKey]);
 
   const fillContents = [];
   for (let i = 0; i < 98; i++) {

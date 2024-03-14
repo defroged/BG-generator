@@ -15,33 +15,51 @@ const bucket = storage.bucket(bucketName);
 
 async function processFormData(fields, files) {
   const images = Object.entries(files).filter(([key, value]) => key.startsWith('image'));
-  const newFields = { ...fields };
+  let boxCount = 1;
 
   for (const [key, imageFile] of images) {
-    const imageBytes = await fs.readFile(imageFile.path);
-    newFields[key] = imageBytes;
+    if (imageFile.size > 0) {
+      const imageBytes = await fs.readFile(imageFile.path);
+      fields[`box${boxCount}`] = imageBytes;
+      boxCount++;
+    }
   }
 
-  return newFields;
+  for (const [key, value] of Object.entries(fields)) {
+    if (key.startsWith('box') && value.length > 0) {
+      fields[key] = value[0];
+      boxCount++;
+    } else {
+      delete fields[key];
+    }
+  }
+
+  return fields;
 }
 
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
 
   form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error parsing form data.');
+  if (err) {
+    console.error(err);
+    res.status(500).send('Error parsing form data.');
+    return;
+  }
+  console.log('Received Fields:', fields);
+
+  try {
+    let processedFields = {};
+    const textItems = Object.keys(fields).filter((key) => key.startsWith('box')).length;
+    const imageItems = Object.keys(files).filter((key) => key.startsWith('image')).length;
+    if (textItems > 0 || imageItems > 0) {
+      processedFields = await processFormData(fields, files);
+    } else {
+      res.status(400).send('At least one text or image input is required.');
       return;
     }
-    console.log('Received Fields:', fields);
 
-    try {
-  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  const pdfDoc = await PDFDocument.load(pdfBytes);
-
-  const processedFields = await processFormData(fields, files);
-  await addTextToPdf(pdfDoc, processedFields);
+    await addTextToPdf(pdfDoc, processedFields);
 
   const newPdfBytes = await pdfDoc.save();
 
@@ -63,8 +81,8 @@ module.exports = async (req, res) => {
   res.status(200).json({ downloadUrl: downloadUrl[0] });
 
 } catch (error) {
-  console.error(error);
-  res.status(500).send('An error occurred during PDF processing.');
-}
-  });
+    console.error(error);
+    res.status(500).send('An error occurred during PDF processing.');
+  }
+});
 };
