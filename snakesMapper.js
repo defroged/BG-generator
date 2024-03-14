@@ -42,6 +42,28 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
+async function embedImageToPdf(pdfDoc, imageUrl, x, y, width, height) {
+  const imageBytes = await fetch(imageUrl).then((res) => res.arrayBuffer());
+  const imageExtension = imageUrl.split('.').pop().toLowerCase();
+
+  let embeddedImage;
+  if (imageExtension === 'jpg' || imageExtension === 'jpeg') {
+    embeddedImage = await pdfDoc.embedJpg(imageBytes);
+  } else if (imageExtension === 'png') {
+    embeddedImage = await pdfDoc.embedPng(imageBytes);
+  } else {
+    throw new Error('Unsupported image format');
+  }
+
+  const page = pdfDoc.getPage(0);
+  page.drawImage(embeddedImage, {
+    x: x,
+    y: y,
+    width: width,
+    height: height,
+  });
+}
+
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
@@ -51,15 +73,17 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
-  const userInputTexts = boxKeys.map((boxKey) => {
-    const inputTextArray = fields[boxKey];
-    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  });
+  const boxKeysAndImages = boxKeys.map((boxKey, index) => {
+  const inputTextArray = fields[boxKey];
+  const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+  const inputImage = fields[`image${index + 1}`];
+  return { inputText, inputImage };
+});
 
-  const fillTexts = [];
-  for (let i = 0; i < 98; i++) {
-    fillTexts[i] = userInputTexts[i % userInputTexts.length];
-  }
+  const fillItems = [];
+for (let i = 0; i < 98; i++) {
+  fillItems[i] = boxKeysAndImages[i % boxKeysAndImages.length];
+}
 
   const positions = [
     { x: 140, y: 5 }, // 1
@@ -169,7 +193,7 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOpacity = 0.5;
 
   shuffledIndices.forEach((randomIndex, index) => {
-    const inputText = fillTexts[index];
+    const { inputText, inputImage } = fillItems[index];
     const position = positions[randomIndex];
     const maxWidth = 70;
     const maxHeight = 60;
@@ -226,6 +250,10 @@ if (lines.length === 1) {
         color: rgb(0.1, 0.1, 0.1),
       });
     });
+	if (inputImage) {
+  await embedImageToPdf(pdfDoc, inputImage, position.x, position.y, 70, 60);
+}
+	
   });
 }
 
