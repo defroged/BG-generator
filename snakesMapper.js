@@ -44,19 +44,18 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 
 async function embedImageToPdf(pdfDoc, imageFile, x, y, width, height) {
   const imageBytes = await new Promise((resolve, reject) => {
-    const fileReader = new FileReader();
-    fileReader.onload = () => resolve(fileReader.result);
-    fileReader.onerror = () => reject(fileReader.error);
-    fileReader.readAsArrayBuffer(imageFile);
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(imageFile);
+    reader.onload = () => resolve(new Uint8Array(reader.result));
+    reader.onerror = (error) => reject(error);
   });
 
-  const imageExtension = imageFile.name.split('.').pop().toLowerCase();
-
   let embeddedImage;
+  const imageExtension = imageFile.name.split('.').pop().toLowerCase();
   if (imageExtension === 'jpg' || imageExtension === 'jpeg') {
-    embeddedImage = await pdfDoc.embedJpg(new Uint8Array(imageBytes));
+    embeddedImage = await pdfDoc.embedJpg(imageBytes);
   } else if (imageExtension === 'png') {
-    embeddedImage = await pdfDoc.embedPng(new Uint8Array(imageBytes));
+    embeddedImage = await pdfDoc.embedPng(imageBytes);
   } else {
     throw new Error('Unsupported image format');
   }
