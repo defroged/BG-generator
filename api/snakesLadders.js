@@ -13,71 +13,45 @@ const storage = new Storage({
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
-async function parseForm(req) {
-  return new Promise((resolve, reject) => {
-    const files = {};
-    const form = new formidable.IncomingForm();
-
-    function errorCallback(err) {
-      if (err.code === 'EEMPTY') {
-        resolve({ fields: form.fields, files: files });
-      } else {
-        reject(err);
-      }
-    }
-    
-    form.once('error', errorCallback);
-
-    form.on('file', function (fieldname, file) {
-      form.off('error', errorCallback);
-      if (file.size > 0) {
-        files[fieldname] = file;
-      }
-    });
-
-    form.on('error', (err) => {
-      reject(err);
-    });
-
-    form.on('end', () => {
-      resolve({ fields: form.fields, files: files });
-    });
-
-    form.parse(req);
- });
-}
-
 module.exports = async (req, res) => {
-  try {
-    const { fields, files } = await parseForm(req);
+  const form = new formidable.IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error parsing form data.');
+      return;
+    }
     console.log('Received Fields:', fields);
 
-    const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-    const pdfDoc = await PDFDocument.load(pdfBytes);
+    try {
+  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+  const pdfDoc = await PDFDocument.load(pdfBytes);
 
-    await addTextToPdf(pdfDoc, fields, files);
+  await addTextToPdf(pdfDoc, fields);
 
-    const newPdfBytes = await pdfDoc.save();
+  const newPdfBytes = await pdfDoc.save();
 
-    const randomKey = Date.now().toString();
-    const fileName = `${randomKey}.pdf`;
-    console.log('fileName:', fileName);
-    const remoteFile = bucket.file(fileName);
-    console.log('remoteFile:', remoteFile);
-    await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
+  const randomKey = Date.now().toString();
+  const fileName = `${randomKey}.pdf`;
+  console.log('fileName:', fileName);
+  const remoteFile = bucket.file(fileName);
+  console.log('remoteFile:', remoteFile);
+  await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
 
-    const signedUrlConfig = {
-      action: 'read',
-      expires: Date.now() + 12 * 60 * 60 * 1000,
-      contentDisposition: 'attachment; filename=customized_board_game.pdf',
-    };
+  const signedUrlConfig = {
+    action: 'read',
+    expires: Date.now() + 12 * 60 * 60 * 1000,
+    contentDisposition: 'attachment; filename=customized_board_game.pdf',
+  };
 
-    const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+  const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
-    res.status(200).json({ downloadUrl: downloadUrl[0] });
+  res.status(200).json({ downloadUrl: downloadUrl[0] });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error parsing form data.");
-  }
+} catch (error) {
+  console.error(error);
+  res.status(500).send('An error occurred during PDF processing.');
+}
+  });
 };
