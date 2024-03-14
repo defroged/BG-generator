@@ -18,7 +18,18 @@ async function parseForm(req) {
     const files = {};
     const form = new formidable.IncomingForm();
 
+    function errorCallback(err) {
+      if (err.code === 'EEMPTY') {
+        resolve({ fields: form.fields, files: files });
+      } else {
+        reject(err);
+      }
+    }
+    
+    form.once('error', errorCallback);
+
     form.on('file', function (fieldname, file) {
+      form.off('error', errorCallback);
       if (file.size > 0) {
         files[fieldname] = file;
       }
