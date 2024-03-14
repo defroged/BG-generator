@@ -43,6 +43,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 }
 
 async function embedImageToPdf(pdfDoc, imageFile, x, y, width, height) {
+	console.log('Embedding image:', imageFile.name);
   const imageBytes = await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsArrayBuffer(imageFile);
