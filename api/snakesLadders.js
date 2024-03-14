@@ -37,46 +37,36 @@ async function parseForm(req) {
 }
 
 module.exports = async (req, res) => {
-  const form = new formidable.IncomingForm();
-  
-
   try {
-  const { fields, files } = await parseForm(req);
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error parsing form data.');
-      return;
-    }
+    const { fields, files } = await parseForm(req);
     console.log('Received Fields:', fields);
 
-    try {
-  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+    const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addTextToPdf(pdfDoc, fields, files);
+    await addTextToPdf(pdfDoc, fields, files);
 
-  const newPdfBytes = await pdfDoc.save();
+    const newPdfBytes = await pdfDoc.save();
 
-  const randomKey = Date.now().toString();
-  const fileName = `${randomKey}.pdf`;
-  console.log('fileName:', fileName);
-  const remoteFile = bucket.file(fileName);
-  console.log('remoteFile:', remoteFile);
-  await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
+    const randomKey = Date.now().toString();
+    const fileName = `${randomKey}.pdf`;
+    console.log('fileName:', fileName);
+    const remoteFile = bucket.file(fileName);
+    console.log('remoteFile:', remoteFile);
+    await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
 
-  const signedUrlConfig = {
-    action: 'read',
-    expires: Date.now() + 12 * 60 * 60 * 1000,
-    contentDisposition: 'attachment; filename=customized_board_game.pdf',
-  };
+    const signedUrlConfig = {
+      action: 'read',
+      expires: Date.now() + 12 * 60 * 60 * 1000,
+      contentDisposition: 'attachment; filename=customized_board_game.pdf',
+    };
 
-  const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+    const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
-  res.status(200).json({ downloadUrl: downloadUrl[0] });
+    res.status(200).json({ downloadUrl: downloadUrl[0] });
 
-} catch (err) {
-  console.error(err);
-  res.status(500).send("Error parsing form data.");
-}
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error parsing form data.");
+  }
 };
