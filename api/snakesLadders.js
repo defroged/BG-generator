@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
   const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addTextToPdf(pdfDoc, fields);
+  await addTextToPdf(pdfDoc, fields, files);
 
   const newPdfBytes = await pdfDoc.save();
 

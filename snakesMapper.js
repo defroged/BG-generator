@@ -1,6 +1,23 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
+async function embedImage(pdfDoc, imageFile) {
+  const imageBytes = await fs.readFile(imageFile.path);
+  const extension = imageFile.type.split('/')[1];
+
+  let embeddedImage;
+
+  if (extension === 'jpg' || extension === 'jpeg') {
+    embeddedImage = await pdfDoc.embedJpg(imageBytes);
+  } else if (extension === 'png') {
+    embeddedImage = await pdfDoc.embedPng(imageBytes);
+  } else {
+    throw new Error('Unsupported image format');
+  }
+
+  return embeddedImage;
+}
+
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
   let fontSize = defaultFontSize;
@@ -42,7 +59,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
-async function addTextToPdf(pdfDoc, fields) {
+async function addTextToPdf(pdfDoc, fields, files) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   const pages = pdfDoc.getPages();
@@ -193,6 +210,20 @@ if (lines.length === 1) {
   const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
   const yOffset = calculateYOffset(lines.length);
   startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+}
+
+const imageKey = `image${index + 1}`;
+const imageFile = files[imageKey];
+
+if (imageFile) {
+  const embeddedImage = await embedImage(pdfDoc, imageFile);
+  const imageDims = embeddedImage.scaleToFit(maxWidth * 0.6, maxHeight * 0.6);
+  firstPage.drawImage(embeddedImage, {
+    x: position.x + (maxWidth - imageDims.width) / 2,
+    y: startY - imageDims.height - 5,
+    width: imageDims.width,
+    height: imageDims.height,
+  });
 }
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
