@@ -40,6 +40,12 @@ async function processFormData(fields, files) {
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.allowEmptyFiles = true;
+  form.onPart = function (part) {
+  if (!part.filename) {
+    part.on('data', function () {});
+  }
+  this.handlePart(part);
+};
   form.parse(req, async (err, fields, files) => {
   if (err) {
     console.error(err);
