@@ -32,6 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); 
         
         const formData = new FormData(form);
+		for (let i = 1; i <= form.querySelectorAll('[type="file"]').length; i++) {
+    const imageInput = formData.get(`image${i}`);
+    if (imageInput && imageInput.size === 0) {
+      formData.delete(`image${i}`);
+    }
+  }
         for (let pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
