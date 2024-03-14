@@ -76,7 +76,8 @@ async function addTextToPdf(pdfDoc, fields) {
   const boxKeysAndImages = boxKeys.map((boxKey, index) => {
   const inputTextArray = fields[boxKey];
   const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  const inputImage = fields[`image${index + 1}`];
+  const inputImageArray = fields[`image${index + 1}`];
+  const inputImage = Array.isArray(inputImageArray) && inputImageArray.length > 0 && inputImageArray[0].size > 0 ? inputImageArray[0] : null;
   return { inputText, inputImage };
 });
 
