@@ -13,6 +13,18 @@ const storage = new Storage({
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
+async function processFormData(fields, files) {
+  const images = Object.entries(files).filter(([key, value]) => key.startsWith('image'));
+  const newFields = { ...fields };
+
+  for (const [key, imageFile] of images) {
+    const imageBytes = await fs.readFile(imageFile.path);
+    newFields[key] = imageBytes;
+  }
+
+  return newFields;
+}
+
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
 
@@ -28,7 +40,8 @@ module.exports = async (req, res) => {
   const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addTextToPdf(pdfDoc, fields);
+  const processedFields = await processFormData(fields, files);
+  await addTextToPdf(pdfDoc, processedFields);
 
   const newPdfBytes = await pdfDoc.save();
 

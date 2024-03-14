@@ -1,4 +1,3 @@
-const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
@@ -42,6 +41,83 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
+function isImageData(data) {
+  return Buffer.isBuffer(data);
+}
+
+async function drawImageOrText(content, pdfDoc, firstPage, helveticaFont, position) {
+  if (isImageData(content)) {
+    const image = await pdfDoc.embedPng(content);
+    const imageWidth = 70;
+    const imageHeight = 60;
+    firstPage.drawImage(image, {
+      x: position.x,
+      y: position.y,
+      width: imageWidth,
+      height: imageHeight,
+    });
+  } else {
+    const inputText = content;
+    const maxWidth = 70;
+    const maxHeight = 60;
+    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+    const lineSpacing = 1.2;
+    const lineHeight = helveticaFont.heightAtSize(fontSize);
+
+    function calculateYOffset(linesCount) {
+      if (linesCount <= 4) {
+        return 17;
+      } else {
+        return 17 + (linesCount - 4) * 7;
+      }
+    }
+
+    let startY;
+    if (lines.length === 1) {
+      startY = position.y + (maxHeight - lineHeight) / 2;
+    } else {
+      const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+      const yOffset = calculateYOffset(lines.length);
+      startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+    }
+
+    const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
+      return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
+          ? currentIndex
+          : maxIndex;
+    }, 0);
+
+    const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
+    const lineX = position.x + (maxWidth - longestLineWidth) / 2;
+
+    const strokeOffset = 0.8;
+    const strokeOpacity = 0.5;
+
+    lines.forEach((line, i) => {
+      const lineY = startY - i * lineHeight * lineSpacing;
+      const offsets = [-strokeOffset, strokeOffset];
+      offsets.forEach(dx => {
+        offsets.forEach(dy => {
+          firstPage.drawText(line, {
+            x: lineX + dx,
+            y: lineY + dy,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(1, 1, 1, strokeOpacity),
+          });
+        });
+      });
+      firstPage.drawText(line, {
+        x: lineX,
+        y: lineY,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+    });
+  }
+}
+
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
@@ -49,16 +125,12 @@ async function addTextToPdf(pdfDoc, fields) {
   const firstPage = pages[0];
   const { width, height } = firstPage.getSize();
 
-  const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
+  const boxKeys = Object.keys(fields).filter((key) => key.startsWith('box') || key.startsWith('image'));
+  const userInputContents = boxKeys.map((boxKey) => fields[boxKey] || '');
 
-  const userInputTexts = boxKeys.map((boxKey) => {
-    const inputTextArray = fields[boxKey];
-    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  });
-
-  const fillTexts = [];
+  const fillContents = [];
   for (let i = 0; i < 98; i++) {
-    fillTexts[i] = userInputTexts[i % userInputTexts.length];
+    fillContents[i] = userInputContents[i % userInputContents.length];
   }
 
   const positions = [
@@ -162,71 +234,14 @@ async function addTextToPdf(pdfDoc, fields) {
 	{ x: 710, y: 537 }, // 98
   ];
 
-   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
+  const boxIndices = Array.from({ length: 98 }, (_, i) => i);
   const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
 
-  const strokeOffset = 0.8;
-  const strokeOpacity = 0.5;
-
-  shuffledIndices.forEach((randomIndex, index) => {
-    const inputText = fillTexts[index];
+  for (const [index, randomIndex] of shuffledIndices.entries()) {
+    const content = fillContents[index];
     const position = positions[randomIndex];
-    const maxWidth = 70;
-    const maxHeight = 60;
-    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
-    const lineSpacing = 1.2;
-    const lineHeight = helveticaFont.heightAtSize(fontSize);
-
-    
-function calculateYOffset(linesCount) {
-  if (linesCount <= 4) {
-    return 17;
-  } else {
-    return 17 + (linesCount - 4) * 7;
+    await drawImageOrText(content, pdfDoc, firstPage, helveticaFont, position);
   }
-}
-
-let startY;
-if (lines.length === 1) {
-  startY = position.y + (maxHeight - lineHeight) / 2;
-} else {
-  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  const yOffset = calculateYOffset(lines.length);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-}
-
-    const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
-      return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
-          ? currentIndex
-          : maxIndex;
-    }, 0);
-
-    const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
-    const lineX = position.x + (maxWidth - longestLineWidth) / 2;
-
-    lines.forEach((line, i) => {
-      const lineY = startY - i * lineHeight * lineSpacing;
-      const offsets = [-strokeOffset, strokeOffset];
-      offsets.forEach(dx => {
-        offsets.forEach(dy => {
-          firstPage.drawText(line, {
-            x: lineX + dx,
-            y: lineY + dy,
-            size: fontSize,
-            font: helveticaFont,
-            color: rgb(1, 1, 1, strokeOpacity),
-          });
-        });
-      });
-      firstPage.drawText(line, {
-        x: lineX,
-        y: lineY,
-        size: fontSize,
-        font: helveticaFont,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-    });
-  });
 }
 
 module.exports = {
