@@ -15,7 +15,9 @@ const bucket = storage.bucket(bucketName);
 
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
-  form.on('file', function (fieldname, file) {
+  const files = {};
+
+form.on('file', function (fieldname, file) {
   if (file.size === 0 && file.type === '') {
     file.path = '';
   } else {
