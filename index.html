@@ -32,17 +32,18 @@
 			<h1 class="catch-phrase">ESL Board Game & Puzzle Generator</h1>
 			</div>
 			<div class="form-container">
-    <h2>Customize Your Board Game</h2>
-    <form id="customizationForm" action="/api/snakesLadders" method="POST" enctype="multipart/form-data">
-        <div class="input-fields">
-    <div class="input-group">
+  <h2>Customize Your Board Game</h2>
+  <form id="customizationForm" action="/api/snakesLadders" method="POST" enctype="multipart/form-data">
+    <div class="input-fields">
+      <div class="input-group">
         <label for="box1">Box 1:</label>
         <input type="text" id="box1" name="box1">
+        <input type="file" id="image1" name="image1" accept="image/*">
+      </div>
     </div>
-</div>
-<button type="button" id="addInputBtn">+ add</button>
-        <button type="submit" id="generate-pdf-button">Generate PDF</button>
-    </form>
+    <button type="button" id="addInputBtn">+ add</button>
+    <button type="submit" id="generate-pdf-button">Generate PDF</button>
+  </form>
 </div>
 
 
