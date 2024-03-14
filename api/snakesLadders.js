@@ -13,19 +13,35 @@ const storage = new Storage({
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
+async function parseForm(req) {
+  return new Promise((resolve, reject) => {
+    const files = {};
+    const form = new formidable.IncomingForm();
+
+    form.on('file', function (fieldname, file) {
+      if (file.size > 0) {
+        files[fieldname] = file;
+      }
+    });
+
+    form.on('error', (err) => {
+      reject(err);
+    });
+
+    form.on('end', () => {
+      resolve({ fields: form.fields, files: files });
+    });
+
+    form.parse(req);
+ });
+}
+
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
-  const files = {};
+  
 
-form.on('file', function (fieldname, file) {
-  if (file.size === 0 && file.type === '') {
-    file.path = '';
-  } else {
-    files[fieldname] = file;
-  }
-});
-
-  form.parse(req, async (err, fields) => {
+  try {
+  const { fields, files } = await parseForm(req);
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');
@@ -58,9 +74,9 @@ form.on('file', function (fieldname, file) {
 
   res.status(200).json({ downloadUrl: downloadUrl[0] });
 
-} catch (error) {
-  console.error(error);
-  res.status(500).send('An error occurred during PDF processing.');
+} catch (err) {
+  console.error(err);
+  res.status(500).send("Error parsing form data.");
 }
   });
 };
