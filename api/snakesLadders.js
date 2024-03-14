@@ -15,9 +15,15 @@ const bucket = storage.bucket(bucketName);
 
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
-  form.allowEmptyFiles = true;
+  form.on('file', function (fieldname, file) {
+  if (file.size === 0 && file.type === '') {
+    file.path = '';
+  } else {
+    files[fieldname] = file;
+  }
+});
 
-  form.parse(req, async (err, fields, files) => {
+  form.parse(req, async (err, fields) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');
