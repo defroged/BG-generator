@@ -192,7 +192,7 @@ for (let i = 0; i < 98; i++) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-  shuffledIndices.forEach((randomIndex, index) => {
+  shuffledIndices.forEach(async (randomIndex, index) => {
     const { inputText, inputImage } = fillItems[index];
     const position = positions[randomIndex];
     const maxWidth = 70;
