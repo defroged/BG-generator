@@ -78,8 +78,15 @@ function addNewInput() {
     newInput.id = `box${inputCount + 1}`;
     newInput.name = `box${inputCount + 1}`;
 
+    const newUploadButton = document.createElement('input');
+    newUploadButton.type = 'file';
+    newUploadButton.id = `image${inputCount + 1}`;
+    newUploadButton.name = `image${inputCount + 1}`;
+    newUploadButton.accept = 'image/*';
+
     newInputGroup.appendChild(newInputLabel);
     newInputGroup.appendChild(newInput);
+    newInputGroup.appendChild(newUploadButton);
     inputFields.appendChild(newInputGroup);
 }
 
