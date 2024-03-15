@@ -25,12 +25,18 @@ module.exports = async (req, res) => {
     console.log('Received Fields:', fields);
 
     try {
-  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  const pdfDoc = await PDFDocument.load(pdfBytes);
+  //const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+  //const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addTextToPdf(pdfDoc, fields);
+  //await addTextToPdf(pdfDoc, fields);
 
-  const newPdfBytes = await pdfDoc.save();
+  //const newPdfBytes = await pdfDoc.save();
+  
+  // Add the following lines
+  const firstImageKey = Object.keys(files).find((key) => key.startsWith('image') && files[key].size > 0);
+  const firstImageFile = files[firstImageKey];
+  const newPdfBytes = await createImageOnlyPdf(firstImageFile);
+  // End of added lines
 
   const randomKey = Date.now().toString();
   const fileName = `${randomKey}.pdf`;

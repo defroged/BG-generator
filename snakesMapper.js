@@ -1,6 +1,37 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
+async function createImageOnlyPdf(imageFile) {
+  const pdfDoc = await PDFDocument.create();
+  const imageBytes = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(imageFile);
+    reader.onload = () => resolve(new Uint8Array(reader.result));
+    reader.onerror = (error) => reject(error);
+  });
+  
+  const imageExtension = imageFile.name.split('.').pop().toLowerCase();
+  let embeddedImage;
+  
+  if (imageExtension === 'jpg' || imageExtension === 'jpeg') {
+    embeddedImage = await pdfDoc.embedJpg(imageBytes);
+  } else if (imageExtension === 'png') {
+    embeddedImage = await pdfDoc.embedPng(imageBytes);
+  } else {
+    throw new Error('Unsupported image format');
+  }
+
+  const page = pdfDoc.addPage();
+  page.drawImage(embeddedImage, {
+    x: 100,
+    y: 100,
+    width: 200,
+    height: 200,
+  });
+
+  return await pdfDoc.save();
+}
+
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
   let fontSize = defaultFontSize;
