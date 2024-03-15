@@ -34,10 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
 		for (let i = 1; i <= form.querySelectorAll('[type="file"]').length; i++) {
     const imageInput = formData.get(`image${i}`);
-    if (imageInput && imageInput.size === 0) {
-      formData.delete(`image${i}`);
+    if (imageInput && imageInput.size > 0) {
+        formData.set(`box${i}`, imageInput);
+    } else {
+        formData.delete(`image${i}`);
     }
-  }
+}
         for (let pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
@@ -56,11 +58,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const downloadUrl = json.downloadUrl; 
             const downloadLink = document.createElement('a');
             downloadLink.href = downloadUrl;
-            // Remove the download attribute to prevent automatic download
-            // Set the target attribute to '_blank' to open in a new window/tab
             downloadLink.target = '_blank';
             document.body.appendChild(downloadLink);
-            downloadLink.click(); // This will now open the URL in a new window/tab instead of downloading
+            downloadLink.click(); 
             document.body.removeChild(downloadLink);
         })
         .catch(error => console.error('Error:', error));
@@ -68,6 +68,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 const addInputBtn = document.getElementById('addInputBtn');
+function disableOtherInput(targetInput, isImage) {
+    if (isImage) {
+        targetInput.previousElementSibling.disabled = targetInput.files.length > 0;
+    } else {
+        targetInput.nextElementSibling.disabled = targetInput.value.length > 0;
+    }
+}
+
 function addNewInput() {
     const inputFields = document.querySelector('.input-fields');
     const inputCount = inputFields.childElementCount;
@@ -83,12 +91,18 @@ function addNewInput() {
     newInput.type = 'text';
     newInput.id = `box${inputCount + 1}`;
     newInput.name = `box${inputCount + 1}`;
+    newInput.addEventListener('input', function (event) {
+        disableOtherInput(event.target, false);
+    });
 
     const newUploadButton = document.createElement('input');
     newUploadButton.type = 'file';
     newUploadButton.id = `image${inputCount + 1}`;
     newUploadButton.name = `image${inputCount + 1}`;
     newUploadButton.accept = 'image/*';
+    newUploadButton.addEventListener('change', function (event) {
+        disableOtherInput(event.target, true);
+    });
 
     newInputGroup.appendChild(newInputLabel);
     newInputGroup.appendChild(newInput);
@@ -105,11 +119,8 @@ document.addEventListener('keydown', (e) => {
     if (focusedElement.tagName === 'INPUT' && focusedElement.parentElement.parentElement.lastElementChild === focusedElement.parentElement) {
       addNewInput();
 
-      // Get a reference to the new input field
       const inputFields = document.querySelector('.input-fields');
       const lastInput = inputFields.lastElementChild.querySelector('input');
-
-      // Focus on the new input field
       lastInput.focus();
     }
   }
