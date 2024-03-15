@@ -210,7 +210,7 @@ async function addTextToPdf(pdfDoc, fields) {
 
       let startY;
       let embedImageInPdf = false;
-      if (typeof inputText === "string" && inputText.startsWith("http")) {
+      if (inputText && typeof inputText === "string" && inputText.startsWith("http")) {
         try {
           const embeddedImage = await embedImage(pdfDoc, inputText);
           const imageDims = embeddedImage.scale(1);
