@@ -111,7 +111,13 @@ function addNewInput() {
 }
 
 addInputBtn.addEventListener('click', addNewInput);
+document.getElementById('box1').addEventListener('input', function (event) {
+    disableOtherInput(event.target, false);
+});
 
+document.getElementById('image1').addEventListener('change', function (event) {
+    disableOtherInput(event.target, true);
+});
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
