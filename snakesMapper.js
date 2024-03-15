@@ -262,6 +262,7 @@ async function addTextToPdf(pdfDoc, fields) {
       });
     });
   }
+  }
 
 module.exports = {
   addTextToPdf
