@@ -30,7 +30,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 
   while (fontSize > 1) {
     lines = [];
-    words = text.split(' ');
+    words = text ? text.split(' ') : [];
 
     while (words.length > 0) {
       currentLineWords = [];
