@@ -1,6 +1,9 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
-const fetch = require('node-fetch');
+let fetch;
+(async () => {
+  fetch = await import('node-fetch').then(module => module.default);
+})();
 
 async function embedImage(pdfDoc, imageUrl) {
   const response = await fetch(imageUrl);
