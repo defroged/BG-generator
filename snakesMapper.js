@@ -266,7 +266,7 @@ let drawingPromises = [];
           });
         });
       }
-    })();
+    }();
   }
   await Promise.all(drawingPromises);
 }
