@@ -1,37 +1,5 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
-const { PDFDocument } = require('pdf-lib');
-
-async function createImageOnlyPdf(imageFile) {
-  const pdfDoc = await PDFDocument.create();
-  const imageBytes = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(imageFile);
-    reader.onload = () => resolve(new Uint8Array(reader.result));
-    reader.onerror = (error) => reject(error);
-  });
-  
-  const imageExtension = imageFile.name.split('.').pop().toLowerCase();
-  let embeddedImage;
-  
-  if (imageExtension === 'jpg' || imageExtension === 'jpeg') {
-    embeddedImage = await pdfDoc.embedJpg(imageBytes);
-  } else if (imageExtension === 'png') {
-    embeddedImage = await pdfDoc.embedPng(imageBytes);
-  } else {
-    throw new Error('Unsupported image format');
-  }
-
-  const page = pdfDoc.addPage();
-  page.drawImage(embeddedImage, {
-    x: 100,
-    y: 100,
-    width: 200,
-    height: 200,
-  });
-
-  return await pdfDoc.save();
-}
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
@@ -74,34 +42,6 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
-async function embedImageToPdf(pdfDoc, imageFile, x, y, width, height) {
-	console.log('Embedding image:', imageFile.name);
-  const imageBytes = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(imageFile);
-    reader.onload = () => resolve(new Uint8Array(reader.result));
-    reader.onerror = (error) => reject(error);
-  });
-
-  let embeddedImage;
-  const imageExtension = imageFile.name.split('.').pop().toLowerCase();
-  if (imageExtension === 'jpg' || imageExtension === 'jpeg') {
-    embeddedImage = await pdfDoc.embedJpg(imageBytes);
-  } else if (imageExtension === 'png') {
-    embeddedImage = await pdfDoc.embedPng(imageBytes);
-  } else {
-    throw new Error('Unsupported image format');
-  }
-
-  const page = pdfDoc.getPage(0);
-  page.drawImage(embeddedImage, {
-    x: x,
-    y: y,
-    width: width,
-    height: height,
-  });
-}
-
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
@@ -111,18 +51,15 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
-  const boxKeysAndImages = boxKeys.map((boxKey, index) => {
-  const inputTextArray = fields[boxKey];
-  const inputText = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  const inputImageArray = fields[`image${index + 1}`];
-  const inputImage = Array.isArray(inputImageArray) && inputImageArray.length > 0 && inputImageArray[0].size > 0 ? inputImageArray[0] : null;
-  return { inputText, inputImage };
-});
+  const userInputTexts = boxKeys.map((boxKey) => {
+    const inputTextArray = fields[boxKey];
+    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+  });
 
-  const fillItems = [];
-for (let i = 0; i < 98; i++) {
-  fillItems[i] = boxKeysAndImages[i % boxKeysAndImages.length];
-}
+  const fillTexts = [];
+  for (let i = 0; i < 98; i++) {
+    fillTexts[i] = userInputTexts[i % userInputTexts.length];
+  }
 
   const positions = [
     { x: 140, y: 5 }, // 1
@@ -231,8 +168,8 @@ for (let i = 0; i < 98; i++) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-  shuffledIndices.forEach(async (randomIndex, index) => {
-    const { inputText, inputImage } = fillItems[index];
+  shuffledIndices.forEach((randomIndex, index) => {
+    const inputText = fillTexts[index];
     const position = positions[randomIndex];
     const maxWidth = 70;
     const maxHeight = 60;
@@ -289,15 +226,9 @@ if (lines.length === 1) {
         color: rgb(0.1, 0.1, 0.1),
       });
     });
-	if (inputImage) {
-  await embedImageToPdf(pdfDoc, inputImage, position.x, position.y, 70, 60);
-}
-	
   });
 }
 
 module.exports = {
   addTextToPdf
 };
-
-module.exports.createImageOnlyPdf = createImageOnlyPdf;

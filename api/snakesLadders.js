@@ -1,4 +1,4 @@
-const { addTextToPdf, createImageOnlyPdf } = require('../snakesMapper')
+const { addTextToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
@@ -25,18 +25,12 @@ module.exports = async (req, res) => {
     console.log('Received Fields:', fields);
 
     try {
-  //const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  //const pdfDoc = await PDFDocument.load(pdfBytes);
+  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+  const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  //await addTextToPdf(pdfDoc, fields);
+  await addTextToPdf(pdfDoc, fields);
 
-  //const newPdfBytes = await pdfDoc.save();
-  
-  // Add the following lines
-  const firstImageKey = Object.keys(files).find((key) => key.startsWith('image') && files[key].size > 0);
-  const firstImageFile = files[firstImageKey];
-  const newPdfBytes = await createImageOnlyPdf(firstImageFile);
-  // End of added lines
+  const newPdfBytes = await pdfDoc.save();
 
   const randomKey = Date.now().toString();
   const fileName = `${randomKey}.pdf`;
