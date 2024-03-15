@@ -298,3 +298,5 @@ if (lines.length === 1) {
 module.exports = {
   addTextToPdf
 };
+
+module.exports.createImageOnlyPdf = createImageOnlyPdf;
