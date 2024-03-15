@@ -1,5 +1,6 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
+const { PDFDocument } = require('pdf-lib');
 
 async function createImageOnlyPdf(imageFile) {
   const pdfDoc = await PDFDocument.create();
