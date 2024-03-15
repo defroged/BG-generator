@@ -66,11 +66,9 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   const { width, height } = firstPage.getSize();
-
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
   const userInputTexts = boxKeys.map((boxKey) => {
@@ -190,8 +188,10 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
+let drawingPromises = [];
+
   for (const [index, randomIndex] of shuffledIndices.entries()) {
-    (async () => {
+    drawingPromises.push((async () => {
       const inputText = fillTexts[index];
       const position = positions[randomIndex];
       const maxWidth = 70;
@@ -220,11 +220,10 @@ async function addTextToPdf(pdfDoc, fields) {
             width: imageDims.width,
             height: imageDims.height,
           });
-          embedImageInPdf = true;
         } catch (error) {
           console.error("Error embedding image:", error);
         }
-      }
+      } else {
 
       if (!embedImageInPdf) {
         if (lines.length === 1) {
@@ -269,6 +268,7 @@ async function addTextToPdf(pdfDoc, fields) {
       }
     })();
   }
+  await Promise.all(drawingPromises);
 }
 
 module.exports = {
