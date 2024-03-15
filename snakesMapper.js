@@ -1,6 +1,24 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
+async function embedImage(pdfDoc, imageUrl) {
+  const response = await fetch(imageUrl);
+  const imageBytes = await response.arrayBuffer();
+  const imageExtension = imageUrl
+    .split(".")
+    .pop()
+    .toLowerCase();
+  let embeddedImage;
+  if (imageExtension === "png") {
+    embeddedImage = await pdfDoc.embedPng(imageBytes);
+  } else if (imageExtension === "jpg" || imageExtension === "jpeg") {
+    embeddedImage = await pdfDoc.embedJpg(imageBytes);
+  } else {
+    throw new Error("Unsupported image type");
+  }
+  return embeddedImage;
+}
+
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
   let fontSize = defaultFontSize;
@@ -168,37 +186,54 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-  shuffledIndices.forEach((randomIndex, index) => {
-    const inputText = fillTexts[index];
-    const position = positions[randomIndex];
-    const maxWidth = 70;
-    const maxHeight = 60;
-    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
-    const lineSpacing = 1.2;
-    const lineHeight = helveticaFont.heightAtSize(fontSize);
+  shuffledIndices.forEach(async (randomIndex, index) => {
+  const inputText = fillTexts[index];
+  const position = positions[randomIndex];
+  const maxWidth = 70;
+  const maxHeight = 60;
+  const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+  const lineSpacing = 1.2;
+  const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    
-function calculateYOffset(linesCount) {
-  if (linesCount <= 4) {
-    return 17;
-  } else {
-    return 17 + (linesCount - 4) * 7;
+  function calculateYOffset(linesCount) {
+    if (linesCount <= 4) {
+      return 17;
+    } else {
+      return 17 + (linesCount - 4) * 7;
+    }
   }
-}
 
-let startY;
-if (lines.length === 1) {
-  startY = position.y + (maxHeight - lineHeight) / 2;
-} else {
-  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  const yOffset = calculateYOffset(lines.length);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-}
+  let startY;
+  let embedImageInPdf = false;
+  if (typeof inputText === "string" && inputText.startsWith("http")) {
+    try {
+      const embeddedImage = await embedImage(pdfDoc, inputText);
+      const imageDims = embeddedImage.scale(1); // You can modify the scale factor accordingly
+      firstPage.drawImage(embeddedImage, {
+        x: position.x + (maxWidth - imageDims.width) / 2,
+        y: position.y + (maxHeight - imageDims.height) / 2,
+        width: imageDims.width,
+        height: imageDims.height,
+      });
+      embedImageInPdf = true;
+    } catch (error) {
+      console.error("Error embedding image:", error);
+    }
+  }
+
+  if (!embedImageInPdf) {
+    if (lines.length === 1) {
+      startY = position.y + (maxHeight - lineHeight) / 2;
+    } else {
+      const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+      const yOffset = calculateYOffset(lines.length);
+      startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+    }
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
       return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
-          ? currentIndex
-          : maxIndex;
+        ? currentIndex
+        : maxIndex;
     }, 0);
 
     const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
@@ -226,8 +261,8 @@ if (lines.length === 1) {
         color: rgb(0.1, 0.1, 0.1),
       });
     });
-  });
-}
+  }
+});
 
 module.exports = {
   addTextToPdf
