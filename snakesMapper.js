@@ -186,7 +186,7 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-  shuffledIndices.forEach(async (randomIndex, index) => {
+  for (const [index, randomIndex] of shuffledIndices.entries()) {
   const inputText = fillTexts[index];
   const position = positions[randomIndex];
   const maxWidth = 70;
