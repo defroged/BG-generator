@@ -1,9 +1,6 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
-let fetch;
-(async () => {
-  fetch = await import('node-fetch').then(module => module.default);
-})();
+const fetch = require('node-fetch');
 
 async function embedImage(pdfDoc, imageUrl) {
   const response = await fetch(imageUrl);
@@ -263,11 +260,10 @@ let drawingPromises = [];
             size: fontSize,
             font: helveticaFont,
             color: rgb(0.1, 0.1, 0.1),
-          });
-        });
+         });
       }
-    }();
-  }
+    })()); 
+}
   await Promise.all(drawingPromises);
 }
 
