@@ -185,11 +185,12 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-let drawingPromises = [];
+(async function main() {
+  const drawingPromises = [];
 
   for (const [index, randomIndex] of shuffledIndices.entries()) {
-  drawingPromises.push(
-    (async (index, randomIndex) => {
+    drawingPromises.push(
+      (async (index, randomIndex) => {
       const inputText = fillTexts[index];
       const position = positions[randomIndex];
       const maxWidth = 70;
@@ -275,10 +276,17 @@ let drawingPromises = [];
           });
         });
       }
-    })(index, randomIndex)
-  );
-}
-await Promise.all(drawingPromises);
+    })(
+        index,
+        randomIndex
+      ).catch((error) => {
+        console.error('Error processing text:', error);
+      })
+    );
+  }
+
+  await Promise.all(drawingPromises);
+})();
 
 module.exports = {
   addTextToPdf,
