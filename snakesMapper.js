@@ -1,24 +1,5 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
-const fetch = require('node-fetch');
-
-async function embedImage(pdfDoc, imageUrl) {
-  const response = await fetch(imageUrl);
-  const imageBytes = await response.arrayBuffer();
-  const imageExtension = imageUrl
-    .split(".")
-    .pop()
-    .toLowerCase();
-  let embeddedImage;
-  if (imageExtension === "png") {
-    embeddedImage = await pdfDoc.embedPng(imageBytes);
-  } else if (imageExtension === "jpg" || imageExtension === "jpeg") {
-    embeddedImage = await pdfDoc.embedJpg(imageBytes);
-  } else {
-    throw new Error("Unsupported image type");
-  }
-  return embeddedImage;
-}
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
@@ -27,7 +8,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 
   while (fontSize > 1) {
     lines = [];
-    words = text ? text.split(' ') : [];
+    words = text.split(' ');
 
     while (words.length > 0) {
       currentLineWords = [];
@@ -63,9 +44,11 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
 
 async function addTextToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   const { width, height } = firstPage.getSize();
+
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
   const userInputTexts = boxKeys.map((boxKey) => {
@@ -179,110 +162,73 @@ async function addTextToPdf(pdfDoc, fields) {
 	{ x: 710, y: 537 }, // 98
   ];
 
-  const boxIndices = Array.from({ length: 98 }, (_, i) => i);
+   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
   const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
 
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-async function main() {
-  const drawingPromises = [];
+  shuffledIndices.forEach((randomIndex, index) => {
+    const inputText = fillTexts[index];
+    const position = positions[randomIndex];
+    const maxWidth = 70;
+    const maxHeight = 60;
+    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+    const lineSpacing = 1.2;
+    const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-  for (const [index, randomIndex] of shuffledIndices.entries()) {
-    drawingPromises.push(
-      (async (index, randomIndex) => {
-      const inputText = fillTexts[index];
-      const position = positions[randomIndex];
-      const maxWidth = 70;
-      const maxHeight = 60;
-      const { fontSize, lines } = fitTextToBox(
-        inputText,
-        helveticaFont,
-        16,
-        maxWidth,
-        maxHeight
-      );
-      const lineSpacing = 1.2;
-      const lineHeight = helveticaFont.heightAtSize(fontSize);
-
-      function calculateYOffset(linesCount) {
-        if (linesCount <= 4) {
-          return 17;
-        } else {
-          return 17 + (linesCount - 4) * 7;
-        }
-      }
-
-      let startY;
-      let embedImageInPdf = false;
-      if (inputText.trim().startsWith("http")) {
-    try {
-        const embeddedImage = await embedImage(pdfDoc, inputText);
-        const imageDims = embeddedImage.scale(1);
-        firstPage.drawImage(embeddedImage, {
-            x: position.x + (maxWidth - imageDims.width) / 2,
-            y: position.y + (maxHeight - imageDims.height) / 2,
-            width: imageDims.width,
-            height: imageDims.height,
-        });
-    } catch (error) {
-        console.error("Error embedding image:", error);
-    }
+    
+function calculateYOffset(linesCount) {
+  if (linesCount <= 4) {
+    return 17;
+  } else {
+    return 17 + (linesCount - 4) * 7;
+  }
 }
 
-if (!embedImageInPdf) {
-    if (lines.length === 1) {
-        startY = position.y + (maxHeight - lineHeight) / 2;
-    } else {
-        const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-        const yOffset = calculateYOffset(lines.length);
-        startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-    }
+let startY;
+if (lines.length === 1) {
+  startY = position.y + (maxHeight - lineHeight) / 2;
+} else {
+  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+  const yOffset = calculateYOffset(lines.length);
+  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+}
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
-        return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize) ? currentIndex : maxIndex;
+      return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
+          ? currentIndex
+          : maxIndex;
     }, 0);
 
     const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
     const lineX = position.x + (maxWidth - longestLineWidth) / 2;
 
     lines.forEach((line, i) => {
-        const lineY = startY - i * lineHeight * lineSpacing;
-        const offsets = [-strokeOffset, strokeOffset];
-        offsets.forEach(dx => {
-            offsets.forEach(dy => {
-                firstPage.drawText(line, {
-                    x: lineX + dx,
-                    y: lineY + dy,
-                    size: fontSize,
-                    font: helveticaFont,
-                    color: rgb(1, 1, 1, strokeOpacity),
-                });
-            });
-        });
-        firstPage.drawText(line, {
-            x: lineX,
-            y: lineY,
+      const lineY = startY - i * lineHeight * lineSpacing;
+      const offsets = [-strokeOffset, strokeOffset];
+      offsets.forEach(dx => {
+        offsets.forEach(dy => {
+          firstPage.drawText(line, {
+            x: lineX + dx,
+            y: lineY + dy,
             size: fontSize,
             font: helveticaFont,
-            color: rgb(0.1, 0.1, 0.1),
+            color: rgb(1, 1, 1, strokeOpacity),
+          });
         });
+      });
+      firstPage.drawText(line, {
+        x: lineX,
+        y: lineY,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(0.1, 0.1, 0.1),
+      });
     });
+  });
 }
-    })(
-        index,
-        randomIndex
-      ).catch((error) => {
-        console.error('Error processing text:', error);
-      })
-    );
-  }
-
-  await Promise.all(drawingPromises);
-}
-
-main();
 
 module.exports = {
-  addTextToPdf,
+  addTextToPdf
 };
