@@ -221,7 +221,6 @@ let drawingPromises = [];
                 console.error("Error embedding image:", error);
             }
         } else {
-            // This else block seems to close here, so the following block should be outside it.
         }
 
         if (!embedImageInPdf) {
@@ -263,7 +262,7 @@ let drawingPromises = [];
                 });
             });
         }
-    })()); // Correctly closed async function call
+    })();
 }
 await Promise.all(drawingPromises);
 
