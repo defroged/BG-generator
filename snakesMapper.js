@@ -185,7 +185,7 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-(async function main() {
+async function main() {
   const drawingPromises = [];
 
   for (const [index, randomIndex] of shuffledIndices.entries()) {
@@ -279,7 +279,9 @@ if (!embedImageInPdf) {
   }
 
   await Promise.all(drawingPromises);
-})();
+}
+
+main();
 
 module.exports = {
   addTextToPdf,
