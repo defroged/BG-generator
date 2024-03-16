@@ -188,7 +188,7 @@ async function addTextToPdf(pdfDoc, fields) {
 let drawingPromises = [];
 
   for (const [index, randomIndex] of shuffledIndices.entries()) {
-    drawingPromises.push((async () => {
+    drawingPromises.push((async (index, randomIndex) => {
         const inputText = fillTexts[index];
         const position = positions[randomIndex];
         const maxWidth = 70;
@@ -262,7 +262,7 @@ let drawingPromises = [];
                 });
             });
         }
-    })();
+  }).bind(null, index, randomIndex)());
 }
 await Promise.all(drawingPromises);
 
