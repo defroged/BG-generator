@@ -20,8 +20,8 @@ async function addImageToPdf(pdfDoc, imagePath, position) {
   firstPage.drawImage(pdfImage, {
     x: position.x,
     y: position.y,
-    width: 100,  // Adjust width as needed
-    height: 100, // Adjust height as needed
+    width: 100,  
+    height: 100, 
   });
 }
 
@@ -253,6 +253,7 @@ if (lines.length === 1) {
   });
 }
 
-module.exports = {
-  addTextToPdf
+module.exports = { 
+    addTextToPdf,
+    addImageToPdf // Make sure this line is present
 };
