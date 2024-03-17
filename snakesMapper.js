@@ -1,5 +1,6 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
+const fs = require('fs').promises;
 
 
 async function addImageToPdf(pdfDoc, imagePath, position) {
