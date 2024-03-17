@@ -30,6 +30,17 @@ module.exports = async (req, res) => {
 
   await addTextToPdf(pdfDoc, fields);
 
+for (let i = 1; i <= 98; i++) { // Assuming you want image inputs for all boxes
+      const fileKey = `box${i}`;
+      if (files[fileKey]) {
+        const imagePath = files[fileKey].filepath;
+
+        // Choose PDF positioning logic based on your needs 
+        const position = calculateImagePosition(i); 
+
+        await addImageToPdf(pdfDoc, imagePath, position);
+      }
+    }
   const newPdfBytes = await pdfDoc.save();
 
   const randomKey = Date.now().toString();
@@ -53,5 +64,16 @@ module.exports = async (req, res) => {
   console.error(error);
   res.status(500).send('An error occurred during PDF processing.');
 }
+
+function calculateImagePosition(boxIndex) {
+  // Replace with your logic to determine (x, y) position based on boxIndex
+  // Example:
+  const row = Math.floor((boxIndex - 1) % 10);
+  const col = Math.floor((boxIndex - 1) / 10);
+  const x = 20 + col * 70; // Adjust spacing as needed
+  const y = 550 - row * 60; // Adjust spacing as needed
+  return { x, y };
+}
+
   });
 };

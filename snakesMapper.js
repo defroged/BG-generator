@@ -1,6 +1,30 @@
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 
+
+async function addImageToPdf(pdfDoc, imagePath, position) {
+  const imageBytes = await fs.readFile(imagePath);
+  const imageType = imagePath.endsWith('.jpg') ? 'jpg' : 'png';
+  
+  let pdfImage;
+  if (imageType === 'jpg') {
+    pdfImage = await pdfDoc.embedJpg(imageBytes);
+  } else if (imageType === 'png') {
+    pdfImage = await pdfDoc.embedPng(imageBytes);
+  } else {
+    throw new Error('Unsupported image type');
+  }
+
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0]; 
+  firstPage.drawImage(pdfImage, {
+    x: position.x,
+    y: position.y,
+    width: 100,  // Adjust width as needed
+    height: 100, // Adjust height as needed
+  });
+}
+
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   let lines = [];
   let fontSize = defaultFontSize;
