@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
   await addTextToPdf(pdfDoc, fields);
 
 for (let i = 1; i <= 98; i++) { // Assuming you want image inputs for all boxes
-      const fileKey = `box${i}`;
+      const fileKey = `box${i}Image`;
       if (files[fileKey]) {
         const imagePath = files[fileKey].filepath;
 
