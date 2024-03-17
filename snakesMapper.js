@@ -4,6 +4,7 @@ const fs = require('fs').promises;
 
 
 async function addImageToPdf(pdfDoc, imagePath, position) {
+	console.log('imagePath:', imagePath);
   const imageBytes = await fs.readFile(imagePath);
   const imageType = imagePath.endsWith('.jpg') ? 'jpg' : 'png';
   
