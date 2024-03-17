@@ -31,12 +31,10 @@ module.exports = async (req, res) => {
 
   await addTextToPdf(pdfDoc, fields);
 
-for (let i = 1; i <= 98; i++) { // Assuming you want image inputs for all boxes
+for (let i = 1; i <= 98; i++) { 
       const fileKey = `box${i}Image`;
       if (files[fileKey]) {
         const imagePath = files[fileKey].filepath;
-
-        // Choose PDF positioning logic based on your needs 
         const position = calculateImagePosition(i); 
 
         await addImageToPdf(pdfDoc, imagePath, position);
@@ -67,12 +65,10 @@ for (let i = 1; i <= 98; i++) { // Assuming you want image inputs for all boxes
 }
 
 function calculateImagePosition(boxIndex) {
-  // Replace with your logic to determine (x, y) position based on boxIndex
-  // Example:
   const row = Math.floor((boxIndex - 1) % 10);
   const col = Math.floor((boxIndex - 1) / 10);
-  const x = 20 + col * 70; // Adjust spacing as needed
-  const y = 550 - row * 60; // Adjust spacing as needed
+  const x = 20 + col * 70; 
+  const y = 550 - row * 60; 
   return { x, y };
 }
 
