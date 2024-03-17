@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); 
         
         const formData = new FormData(form);
+		console.log(formData);
         for (let pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
