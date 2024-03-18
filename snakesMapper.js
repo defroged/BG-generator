@@ -257,5 +257,5 @@ if (lines.length === 1) {
 
 module.exports = { 
     addTextToPdf,
-    addImageToPdf // Make sure this line is present
+    addImageToPdf 
 };
