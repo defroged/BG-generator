@@ -17,7 +17,8 @@ module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
 
   form.parse(req, async (err, fields, files) => {
-	  console.log(req.body);
+	  console.log('Parsed Fields:', fields);
+    console.log('Parsed Files:', files);
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');
