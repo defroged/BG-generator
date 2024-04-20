@@ -5,7 +5,6 @@ const fs = require('fs').promises;
 
 async function addContentToPdf(pdfDoc, fields, files) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const positions = getPositions();  // Assume this is a function returning the positions array
 
   const contents = [];
 
