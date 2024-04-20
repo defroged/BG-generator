@@ -3,15 +3,51 @@ const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
+async function addContentToPdf(pdfDoc, fields, files) {
+  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const positions = getPositions();  // Assume this is a function returning the positions array
+
+  const contents = [];
+
+  // Collect text contents
+  Object.keys(fields).forEach((key) => {
+    if (key.startsWith('box')) {
+      contents.push({ type: 'text', content: fields[key][0] });
+    }
+  });
+
+  // Collect image contents
+  Object.keys(files).forEach((key) => {
+    if (key.endsWith('Image')) {
+      contents.push({ type: 'image', content: files[key][0] });
+    }
+  });
+
+  // Shuffle contents
+  const shuffledContents = contents.sort(() => 0.5 - Math.random());
+
+  // Map shuffled contents to positions and add to PDF
+  for (let i = 0; i < shuffledContents.length; i++) {
+    const contentItem = shuffledContents[i];
+    const position = positions[i % positions.length];  // Ensure we don't run out of positions
+
+    if (contentItem.type === 'text') {
+      const { fontSize, lines } = fitTextToBox(contentItem.content, helveticaFont, 16, 70, 50);
+      addTextToPage(pdfDoc, lines, fontSize, position);
+    } else if (contentItem.type === 'image') {
+      await addImageToPdf(pdfDoc, contentItem.content, position);
+    }
+  }
+}
 
 async function addImageToPdf(pdfDoc, pathObject, position) {
     const imagePath = pathObject.filepath; 
-    const originalFilename = pathObject.originalFilename;  // Use this to get the file type
+    const originalFilename = pathObject.originalFilename;  
 
     console.log('imagePath:', imagePath);
     console.log('originalFilename:', originalFilename);
     const imageBytes = await fs.readFile(imagePath);
-    const imageType = path.extname(originalFilename).substring(1).toLowerCase(); // Extract extension from original filename
+    const imageType = path.extname(originalFilename).substring(1).toLowerCase(); 
     console.log('imageType:', imageType);
 
     let pdfImage;
@@ -263,5 +299,6 @@ if (lines.length === 1) {
 
 module.exports = { 
     addTextToPdf,
-    addImageToPdf 
+    addImageToPdf,
+    addContentToPdf 
 };
