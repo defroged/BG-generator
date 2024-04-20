@@ -33,15 +33,15 @@ module.exports = async (req, res) => {
   await addTextToPdf(pdfDoc, fields);
 
 for (let i = 1; i <= 98; i++) {
-     const fileKey = `box${i}Image`;
-     if (files && files[fileKey]) {
-       const imagePath = files[fileKey].path;  // Ensure this corresponds to the 'path' attribute from formidable
-       const position = calculateImagePosition(i); 
+  const fileKey = `box${i}Image`;
+  if (files && files[fileKey]) {
+    const imagePath = files[fileKey][0].filepath;  // Access the 'filepath' property instead of 'path'
+    const position = calculateImagePosition(i); 
 
-       console.log(`Processing image for box ${i}:`, imagePath);
-       await addImageToPdf(pdfDoc, imagePath, position);
-     }
-   }
+    console.log(`Processing image for box ${i}:`, imagePath);
+    await addImageToPdf(pdfDoc, imagePath, position);
+  }
+}
   const newPdfBytes = await pdfDoc.save();
 
   const randomKey = Date.now().toString();
