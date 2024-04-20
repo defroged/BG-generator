@@ -7,8 +7,9 @@ const fs = require('fs').promises;
 async function addImageToPdf(pdfDoc, imagePath, position) {
     console.log('imagePath:', imagePath);
     const imageBytes = await fs.readFile(imagePath);
-    const imageType = path.extname(imagePath).substring(1).toLowerCase(); // Use path.extname to get the extension directly
-    
+    const imageType = path.extname(imagePath).substring(1).toLowerCase(); // Grab the extension from the path
+    console.log('imageType:', imageType);  // Add this to debug the extracted image type
+
     let pdfImage;
     if (imageType === 'jpg' || imageType === 'jpeg') {
         pdfImage = await pdfDoc.embedJpg(imageBytes);
