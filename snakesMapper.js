@@ -4,11 +4,15 @@ const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
 
-async function addImageToPdf(pdfDoc, imagePath, position) {
+async function addImageToPdf(pdfDoc, pathObject, position) {
+    const imagePath = pathObject.filepath; 
+    const originalFilename = pathObject.originalFilename;  // Use this to get the file type
+
     console.log('imagePath:', imagePath);
+    console.log('originalFilename:', originalFilename);
     const imageBytes = await fs.readFile(imagePath);
-    const imageType = path.extname(imagePath).substring(1).toLowerCase(); // Grab the extension from the path
-    console.log('imageType:', imageType);  // Add this to debug the extracted image type
+    const imageType = path.extname(originalFilename).substring(1).toLowerCase(); // Extract extension from original filename
+    console.log('imageType:', imageType);
 
     let pdfImage;
     if (imageType === 'jpg' || imageType === 'jpeg') {
@@ -24,8 +28,8 @@ async function addImageToPdf(pdfDoc, imagePath, position) {
     firstPage.drawImage(pdfImage, {
         x: position.x,
         y: position.y,
-        width: 100,  
-        height: 100,
+        width: 100,
+        height: 100
     });
 }
 

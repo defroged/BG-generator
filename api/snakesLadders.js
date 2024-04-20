@@ -35,13 +35,14 @@ module.exports = async (req, res) => {
 for (let i = 1; i <= 98; i++) {
   const fileKey = `box${i}Image`;
   if (files && files[fileKey]) {
-    const imagePath = files[fileKey][0].filepath;  // Access the 'filepath' property instead of 'path'
-    const position = calculateImagePosition(i); 
+    const fileObject = files[fileKey][0]; // Pass the entire file object
+    const position = calculateImagePosition(i);
 
-    console.log(`Processing image for box ${i}:`, imagePath);
-    await addImageToPdf(pdfDoc, imagePath, position);
+    console.log(`Processing image for box ${i}:`, fileObject.filepath);
+    await addImageToPdf(pdfDoc, fileObject, position);
   }
 }
+
   const newPdfBytes = await pdfDoc.save();
 
   const randomKey = Date.now().toString();
