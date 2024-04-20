@@ -1,30 +1,31 @@
+const path = require('path');
 const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
 
 async function addImageToPdf(pdfDoc, imagePath, position) {
-	console.log('imagePath:', imagePath);
-  const imageBytes = await fs.readFile(imagePath);
-  const imageType = imagePath.endsWith('.jpg') ? 'jpg' : 'png';
-  
-  let pdfImage;
-  if (imageType === 'jpg') {
-    pdfImage = await pdfDoc.embedJpg(imageBytes);
-  } else if (imageType === 'png') {
-    pdfImage = await pdfDoc.embedPng(imageBytes);
-  } else {
-    throw new Error('Unsupported image type');
-  }
+    console.log('imagePath:', imagePath);
+    const imageBytes = await fs.readFile(imagePath);
+    const imageType = path.extname(imagePath).substring(1).toLowerCase(); // Use path.extname to get the extension directly
+    
+    let pdfImage;
+    if (imageType === 'jpg' || imageType === 'jpeg') {
+        pdfImage = await pdfDoc.embedJpg(imageBytes);
+    } else if (imageType === 'png') {
+        pdfImage = await pdfDoc.embedPng(imageBytes);
+    } else {
+        throw new Error('Unsupported image type: ' + imageType);
+    }
 
-  const pages = pdfDoc.getPages();
-  const firstPage = pages[0]; 
-  firstPage.drawImage(pdfImage, {
-    x: position.x,
-    y: position.y,
-    width: 100,  
-    height: 100, 
-  });
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    firstPage.drawImage(pdfImage, {
+        x: position.x,
+        y: position.y,
+        width: 100,  
+        height: 100,
+    });
 }
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
