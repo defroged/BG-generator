@@ -17,55 +17,64 @@ module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
 
   form.parse(req, async (err, fields, files) => {
-	  console.log('Parsed Fields:', fields);
-    console.log('Parsed Files:', files);// new logs
     if (err) {
-      console.error(err);
-      res.status(500).send('Error parsing form data.');
-      return;
+        console.error(err);
+        res.status(500).send('Error parsing form data.');
+        return;
     }
-    console.log('Received Fields:', fields);
 
     try {
-  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  const pdfDoc = await PDFDocument.load(pdfBytes);
+        const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+        const pdfDoc = await PDFDocument.load(pdfBytes);
+        
+        // Combining text and image data
+        const items = [];
+        Object.keys(fields).forEach(key => {
+            if (key.startsWith('box')) {
+                items.push({ type: 'text', content: fields[key] });
+            }
+        });
+        Object.keys(files).forEach(key => {
+            if (key.startsWith('box') && files[key].length > 0) {
+                items.push({ type: 'image', content: files[key][0] });
+            }
+        });
 
-  await addTextToPdf(pdfDoc, fields);
+        // Randomly distributing text and images
+        const shuffledItems = items.sort(() => 0.5 - Math.random());
 
-for (let i = 1; i <= 98; i++) {
-  const fileKey = `box${i}Image`;
-  if (files && files[fileKey]) {
-    const fileObject = files[fileKey][0]; // Pass the entire file object
-    const position = calculateImagePosition(i);
+        shuffledItems.forEach((item, index) => {
+            const position = calculateImagePosition(index + 1); // assuming calculateImagePosition functions as expected
+            if (item.type === 'text') {
+                addTextToPdf(pdfDoc, item.content, position);
+            } else if (item.type === 'image') {
+                addImageToPdf(pdfDoc, item.content, position);
+            }
+        });
 
-    console.log(`Processing image for box ${i}:`, fileObject.filepath);
-    await addImageToPdf(pdfDoc, fileObject, position);
-  }
-}
+        const newPdfBytes = await pdfDoc.save();
 
-  const newPdfBytes = await pdfDoc.save();
+        // Remaining code for handling file storage and response
+        const randomKey = Date.now().toString();
+        const fileName = `${randomKey}.pdf`;
+        const remoteFile = bucket.file(fileName);
+        await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
 
-  const randomKey = Date.now().toString();
-  const fileName = `${randomKey}.pdf`;
-  console.log('fileName:', fileName);
-  const remoteFile = bucket.file(fileName);
-  console.log('remoteFile:', remoteFile);
-  await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
+        const signedUrlConfig = {
+            action: 'read',
+            expires: Date.now() + 12 * 60 * 60 * 1000,
+            contentDisposition: 'attachment; filename=customized_board_game.pdf',
+        };
 
-  const signedUrlConfig = {
-    action: 'read',
-    expires: Date.now() + 12 * 60 * 60 * 1000,
-    contentDisposition: 'attachment; filename=customized_board_game.pdf',
-  };
+        const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
 
-  const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+        res.status(200).json({ downloadUrl: downloadUrl[0] });
 
-  res.status(200).json({ downloadUrl: downloadUrl[0] });
-
-} catch (error) {
-  console.error(error);
-  res.status(500).send('An error occurred during PDF processing.');
-}
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred during PDF processing.');
+    }
+});
 
 function calculateImagePosition(boxIndex) {
   const row = Math.floor((boxIndex - 1) % 10);
