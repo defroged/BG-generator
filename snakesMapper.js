@@ -203,7 +203,7 @@ async function addTextToPdf(pdfDoc, fields, images) {
   const strokeOpacity = 0.5;
 
   shuffledIndices.forEach((randomIndex, index) => {
-  if (randomIndex.startsWith('box')) {
+   if (randomIndex.startsWith && randomIndex.startsWith('box')) {
     const inputText = fillTexts[index];
     const position = positions[randomIndex];
 
@@ -253,6 +253,7 @@ async function addTextToPdf(pdfDoc, fields, images) {
     addImageToPdf(pdfDoc, fileObject, position);
   }
 });
+}
 
     
 function calculateYOffset(linesCount) {
@@ -303,8 +304,7 @@ if (lines.length === 1) {
         color: rgb(0.1, 0.1, 0.1),
       });
     });
-  });
-}
+
 
 module.exports = { 
     addTextToPdf,
