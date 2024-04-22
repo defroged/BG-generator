@@ -84,7 +84,7 @@ async function addTextToPdf(pdfDoc, fields, images) {
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
   const imageKeys = Object.keys(images);
 
-  const combinedKeys = boxKeys.concat(imageKeys);
+  const combinedKeys = boxKeys.concat(imageKeys).map((key, index) => ({ key, index }));
 
   const userInputTexts = boxKeys.map((boxKey) => {
     const inputTextArray = fields[boxKey];
@@ -197,14 +197,17 @@ async function addTextToPdf(pdfDoc, fields, images) {
 	{ x: 710, y: 537 }, // 98
   ];
 
-   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
+   const boxIndices = Array.from({ length: 98 }, (_, index) => ({ boxNumber: index + 1 }));
    const shuffledIndices = combinedKeys.sort(() => 0.5 - Math.random());
 
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
-  shuffledIndices.forEach((randomIndex, index) => {
-    if (randomIndex.startsWith('box')) {
+  shuffledIndices.forEach((randomItem, index) => {
+    const boxNumber = randomItem.boxNumber;
+    const position = positions[boxNumber - 1];
+
+    if (randomItem.key.startsWith('box')) {
         const inputText = fillTexts[index];
         const position = positions[parseInt(randomIndex.replace(/\D/g, '')) - 1];
         const maxWidth = 70;
@@ -261,10 +264,9 @@ async function addTextToPdf(pdfDoc, fields, images) {
                 color: rgb(0.1, 0.1, 0.1),
             });
         });
-    } else {
-        const i = parseInt(randomIndex);
+     } else {
+        const i = parseInt(randomItem.key);
         const fileObject = images[i];
-        const position = positions[i - 1];
         addImageToPdf(pdfDoc, fileObject, position);
     }
 });
