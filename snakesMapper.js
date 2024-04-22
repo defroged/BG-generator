@@ -268,6 +268,7 @@ async function addTextToPdf(pdfDoc, fields, images) {
         addImageToPdf(pdfDoc, fileObject, position);
     }
 });
+}
 
 module.exports = { 
     addTextToPdf,
