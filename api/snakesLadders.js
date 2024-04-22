@@ -25,13 +25,13 @@ module.exports = async (req, res) => {
       return;
     }
     console.log('Received Fields:', fields);
-
+const allImages = {};
     try {
   const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
   await addTextToPdf(pdfDoc, fields, allImages);
-const allImages = {};
+
 for (let i = 1; i <= 98; i++) {
   const fileKey = `box${i}Image`;
   if (files && files[fileKey]) {
