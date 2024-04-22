@@ -206,7 +206,7 @@ async function addTextToPdf(pdfDoc, fields, images) {
   shuffledIndices.forEach((randomIndex, index) => {
     if (randomIndex.startsWith('box')) {
         const inputText = fillTexts[index];
-        const position = positions[randomIndex];
+        const position = positions[parseInt(randomIndex.replace(/\D/g, '')) - 1];
         const maxWidth = 70;
         const maxHeight = 60;
         const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
