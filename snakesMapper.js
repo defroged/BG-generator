@@ -74,7 +74,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
-async function addTextToPdf(pdfDoc, fields) {
+async function addTextToPdf(pdfDoc, fields, images) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   const pages = pdfDoc.getPages();
@@ -82,6 +82,8 @@ async function addTextToPdf(pdfDoc, fields) {
   const { width, height } = firstPage.getSize();
 
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
+  const imageKeys = Object.keys(images);
+  const combinedKeys = boxKeys.concat(imageKeys);
 
   const userInputTexts = boxKeys.map((boxKey) => {
     const inputTextArray = fields[boxKey];
@@ -195,19 +197,62 @@ async function addTextToPdf(pdfDoc, fields) {
   ];
 
    const boxIndices = Array.from({ length: 98 }, (_, i) => i);
-  const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
+  const shuffledIndices = combinedKeys.sort(() => 0.5 - Math.random());
 
   const strokeOffset = 0.8;
   const strokeOpacity = 0.5;
 
   shuffledIndices.forEach((randomIndex, index) => {
+  if (randomIndex.startsWith('box')) {
     const inputText = fillTexts[index];
     const position = positions[randomIndex];
+
     const maxWidth = 70;
     const maxHeight = 60;
     const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
+
+    let startY;
+    if (lines.length === 1) {
+      startY = position.y + (maxHeight - lineHeight) / 2;
+    } else {
+      const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+      const yOffset = calculateYOffset(lines.length);
+      startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+    }
+
+    const strokeOffset = 0.8;
+    const strokeOpacity = 0.5;
+    lines.forEach((line, i) => {
+      const lineY = startY - i * lineHeight * lineSpacing;
+      const offsets = [-strokeOffset, strokeOffset];
+      offsets.forEach(dx => {
+        offsets.forEach(dy => {
+          firstPage.drawText(line, {
+            x: lineX + dx,
+            y: lineY + dy,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(1, 1, 1, strokeOpacity),
+          });
+        });
+      });
+      firstPage.drawText(line, {
+        x: lineX,
+        y: lineY,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+    });
+  } else {
+    const boxIndex = parseInt(randomIndex);
+    const fileObject = images[boxIndex];
+    const position = calculateImagePosition(boxIndex);
+    addImageToPdf(pdfDoc, fileObject, position);
+  }
+});
 
     
 function calculateYOffset(linesCount) {

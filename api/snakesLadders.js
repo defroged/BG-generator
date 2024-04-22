@@ -30,8 +30,8 @@ module.exports = async (req, res) => {
   const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addTextToPdf(pdfDoc, fields);
-
+  await addTextToPdf(pdfDoc, fields, allImages);
+  const allImages = {};
 for (let i = 1; i <= 98; i++) {
   const fileKey = `box${i}Image`;
   if (files && files[fileKey]) {
@@ -39,7 +39,7 @@ for (let i = 1; i <= 98; i++) {
     const position = calculateImagePosition(i);
 
     console.log(`Processing image for box ${i}:`, fileObject.filepath);
-    await addImageToPdf(pdfDoc, fileObject, position);
+    allImages[i] = fileObject;
   }
 }
 
