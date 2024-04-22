@@ -16,7 +16,7 @@ const bucket = storage.bucket(bucketName);
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
 
-  form.parse(req, async (err, fields, files) => {
+  (req, async (err, fields, files) => {
     if (err) {
         console.error(err);
         res.status(500).send('Error parsing form data.');
@@ -75,14 +75,4 @@ module.exports = async (req, res) => {
         res.status(500).send('An error occurred during PDF processing.');
     }
 });
-
-function calculateImagePosition(boxIndex) {
-  const row = Math.floor((boxIndex - 1) % 10);
-  const col = Math.floor((boxIndex - 1) / 10);
-  const x = 20 + col * 70; 
-  const y = 550 - row * 60; 
-  return { x, y };
-}
-
-  });
 };
