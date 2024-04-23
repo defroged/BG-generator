@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 
   form.parse(req, async (err, fields, files) => {
 	  console.log('Parsed Fields:', fields);
-    console.log('Parsed Files:', files);// new logs
+    console.log('Parsed Files:', files);
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');

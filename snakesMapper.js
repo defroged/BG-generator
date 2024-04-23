@@ -6,7 +6,7 @@ const fs = require('fs').promises;
 
 async function addImageToPdf(pdfDoc, pathObject, position) {
     const imagePath = pathObject.filepath; 
-    const originalFilename = pathObject.originalFilename;  // Use this to get the file type
+    const originalFilename = pathObject.originalFilename; 
 
     console.log('imagePath:', imagePath);
     console.log('originalFilename:', originalFilename);
@@ -74,7 +74,7 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
-async function addTextToPdf(pdfDoc, fields) {
+async function addElementToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   const pages = pdfDoc.getPages();
@@ -88,9 +88,20 @@ async function addTextToPdf(pdfDoc, fields) {
     return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
   });
 
-  const fillTexts = [];
+  // Create userInputImages array to store image information
+  const imageKeys = Object.keys(fields).filter(key => key.endsWith('Image'));
+  const userInputImages = imageKeys.map((imgKey) => fields[imgKey]);
+
+  // Modify fillTexts to handle both text and images
+  const fillElements = [];
+  const totalElements = userInputTexts.length + userInputImages.length;
   for (let i = 0; i < 98; i++) {
-    fillTexts[i] = userInputTexts[i % userInputTexts.length];
+    const elIndex = i % totalElements;
+    if (elIndex < userInputTexts.length) {
+      fillElements[i] = { type: 'text', content: userInputTexts[elIndex] };
+    } else {
+      fillElements[i] = { type: 'image', content: userInputImages[elIndex - userInputTexts.length] };
+    }
   }
 
   const positions = [
@@ -192,76 +203,74 @@ async function addTextToPdf(pdfDoc, fields) {
 	{ x: 565, y: 537 }, // 96
 	{ x: 640, y: 537 }, // 97
 	{ x: 710, y: 537 }, // 98
-  ];
+    ];
 
-   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
+  const boxIndices = Array.from({ length: 98 }, (_, i) => i);
   const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
 
-  const strokeOffset = 0.8;
-  const strokeOpacity = 0.5;
-
-  shuffledIndices.forEach((randomIndex, index) => {
-    const inputText = fillTexts[index];
+  shuffledIndices.forEach(async (randomIndex, index) => {
+    const element = fillElements[index];
     const position = positions[randomIndex];
-    const maxWidth = 70;
-    const maxHeight = 60;
-    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
-    const lineSpacing = 1.2;
-    const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    
-function calculateYOffset(linesCount) {
-  if (linesCount <= 4) {
-    return 17;
-  } else {
-    return 17 + (linesCount - 4) * 7;
-  }
-}
+    if (element.type === 'text') {
+      const inputText = element.content;
+      const maxWidth = 70;
+      const maxHeight = 60;
+      const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+      const lineSpacing = 1.2;
+      const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-let startY;
-if (lines.length === 1) {
-  startY = position.y + (maxHeight - lineHeight) / 2;
-} else {
-  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  const yOffset = calculateYOffset(lines.length);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-}
+      let startY;
+      if (lines.length === 1) {
+        startY = position.y + (maxHeight - lineHeight) / 2;
+      } else {
+        const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+        const yOffset = calculateYOffset(lines.length);
+        startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+      }
 
-    const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
-      return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
-          ? currentIndex
-          : maxIndex;
-    }, 0);
+      const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
+        return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
+            ? currentIndex
+            : maxIndex;
+      }, 0);
 
-    const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
-    const lineX = position.x + (maxWidth - longestLineWidth) / 2;
+      const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
+      const lineX = position.x + (maxWidth - longestLineWidth) / 2;
 
-    lines.forEach((line, i) => {
-      const lineY = startY - i * lineHeight * lineSpacing;
-      const offsets = [-strokeOffset, strokeOffset];
-      offsets.forEach(dx => {
-        offsets.forEach(dy => {
-          firstPage.drawText(line, {
-            x: lineX + dx,
-            y: lineY + dy,
-            size: fontSize,
-            font: helveticaFont,
-            color: rgb(1, 1, 1, strokeOpacity),
+      lines.forEach((line, i) => {
+        const lineY = startY - i * lineHeight * lineSpacing;
+        const offsets = [-strokeOffset, strokeOffset];
+        offsets.forEach(dx => {
+          offsets.forEach(dy => {
+            firstPage.drawText(line, {
+              x: lineX + dx,
+              y: lineY + dy,
+              size: fontSize,
+              font: helveticaFont,
+              color: rgb(1, 1, 1, strokeOpacity),
+            });
           });
         });
+        firstPage.drawText(line, {
+          x: lineX,
+          y: lineY,
+          size: fontSize,
+          font: helveticaFont,
+          color: rgb(0.1, 0.1, 0.1),
+       });
       });
-      firstPage.drawText(line, {
-        x: lineX,
-        y: lineY,
-        size: fontSize,
-        font: helveticaFont,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-    });
+    } else if (element.type === 'image') {
+      const pathObject = {
+        filepath: element.content.path,
+        originalFilename: element.content.originalFilename,
+      };
+      await addImageToPdf(pdfDoc, pathObject, position);
+    }
   });
 }
 
 module.exports = { 
-    addTextToPdf,
+    addElementToPdf,
     addImageToPdf 
 };
