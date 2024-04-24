@@ -1,4 +1,4 @@
-const { addTextToPdf, addImageToPdf } = require('../snakesMapper');
+const { addElementToPdf, addImageToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addTextToPdf(pdfDoc, fields);
+  await addElementToPdf(pdfDoc, fields);
 
 for (let i = 1; i <= 98; i++) {
   const fileKey = `box${i}Image`;
@@ -76,4 +76,4 @@ function calculateImagePosition(boxIndex) {
 }
 
   });
-};
+};//note
