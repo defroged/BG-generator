@@ -74,6 +74,14 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
+function calculateYOffset(linesCount) {
+  if (linesCount <= 4) {
+    return 17;
+  } else {
+    return 17 + (linesCount - 4) * 7;
+  }
+}
+
 async function addElementToPdf(pdfDoc, fields) {
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
