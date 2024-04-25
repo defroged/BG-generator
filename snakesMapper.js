@@ -211,6 +211,8 @@ async function addElementToPdf(pdfDoc, fields) {
   shuffledIndices.forEach(async (randomIndex, index) => {
     const element = fillElements[index];
     const position = positions[randomIndex];
+	const strokeOffset = 0.8;
+    const strokeOpacity = 0.5;
 
     if (element.type === 'text') {
       const inputText = element.content;
