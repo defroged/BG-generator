@@ -206,12 +206,13 @@ async function addElementToPdf(pdfDoc, fields) {
     ];
 
   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
-  const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
+const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
 
-  shuffledIndices.forEach(async (randomIndex, index) => {
+  for (const index of shuffledIndices) {
+    const randomIndex = shuffledIndices[index];
     const element = fillElements[index];
     const position = positions[randomIndex];
-	const strokeOffset = 0.8;
+    const strokeOffset = 0.8;
     const strokeOpacity = 0.5;
 
     if (element.type === 'text') {
