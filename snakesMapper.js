@@ -270,11 +270,10 @@ const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
       };
       await addImageToPdf(pdfDoc, pathObject, position);
     }
-  });
+  }
 }
 
 module.exports = { 
     addElementToPdf,
     addImageToPdf 
 };
-// endy
