@@ -6,7 +6,7 @@ const fs = require('fs').promises;
 
 async function addImageToPdf(pdfDoc, pathObject, position) {
     const imagePath = pathObject.filepath; 
-    const originalFilename = pathObject.originalFilename; 
+    const originalFilename = pathObject.originalFilename;  // Use this to get the file type
 
     console.log('imagePath:', imagePath);
     console.log('originalFilename:', originalFilename);
@@ -74,19 +74,26 @@ function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
   return { fontSize, lines: [text] };
 }
 
-function calculateYOffset(linesCount) {
-  if (linesCount <= 4) {
-    return 17;
-  } else {
-    return 17 + (linesCount - 4) * 7;
-  }
-}
+async function addTextToPdf(pdfDoc, fields) {
+  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-async function addElementToPdf(pdfDoc, fields) {
-    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const reuseEmbeddedImagesMap = new Map();
-	
-	const positions = [
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+  const { width, height } = firstPage.getSize();
+
+  const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
+
+  const userInputTexts = boxKeys.map((boxKey) => {
+    const inputTextArray = fields[boxKey];
+    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+  });
+
+  const fillTexts = [];
+  for (let i = 0; i < 98; i++) {
+    fillTexts[i] = userInputTexts[i % userInputTexts.length];
+  }
+
+  const positions = [
     { x: 140, y: 5 }, // 1
     { x: 210, y: 5 }, // 2
     { x: 280, y: 5 }, // 3
@@ -185,111 +192,76 @@ async function addElementToPdf(pdfDoc, fields) {
 	{ x: 565, y: 537 }, // 96
 	{ x: 640, y: 537 }, // 97
 	{ x: 710, y: 537 }, // 98
-    ];
+  ];
 
-    // Collect all texts and image descriptors into fillElements
-    const userInputTexts = fields.textInputs; // Assuming this is an array of text entries.
-    const userInputImages = fields.imageInputs.map(img => { // Assuming this is an array of image file descriptions.
-        return {path: img.path, originalFilename: img.originalFilename};
-    });
+   const boxIndices = Array.from({ length: 98 }, (_, i) => i);
+  const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
 
-    // Mix texts and images in the fillElements array
-    let fillElements = [];
-    let textIndex = 0, imageIndex = 0;
+  const strokeOffset = 0.8;
+  const strokeOpacity = 0.5;
 
-    while (fillElements.length < 98) {
-        if (textIndex < userInputTexts.length) {
-            fillElements.push({ type: 'text', content: userInputTexts[textIndex++] });
-        }
-        if (imageIndex < userInputImages.length) {
-            fillElements.push({ type: 'image', content: userInputImages[imageIndex++] });
-        }
-        // Restart indices if end of either array is reached
-        if (textIndex >= userInputTexts.length) textIndex = 0;
-        if (imageIndex >= userInputImages.length) imageIndex = 0;
-    }
+  shuffledIndices.forEach((randomIndex, index) => {
+    const inputText = fillTexts[index];
+    const position = positions[randomIndex];
+    const maxWidth = 70;
+    const maxHeight = 60;
+    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+    const lineSpacing = 1.2;
+    const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    // Loop over fillElements to process text and images
-    fillElements.forEach(async (element, index) => {
-        const position = positions[index % positions.length]; // Wrap around if more elements than positions
-        if (element.type === 'text') {
-      const inputText = element.content;
-      const maxWidth = 70;
-      const maxHeight = 60;
-      const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
-      const lineSpacing = 1.2;
-      const lineHeight = helveticaFont.heightAtSize(fontSize);
-
-      let startY;
-      if (lines.length === 1) {
-        startY = position.y + (maxHeight - lineHeight) / 2;
-      } else {
-        const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-        const yOffset = calculateYOffset(lines.length);
-        startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-      }
-
-      const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
-        return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
-            ? currentIndex
-            : maxIndex;
-      }, 0);
-
-      const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
-      const lineX = position.x + (maxWidth - longestLineWidth) / 2;
-
-      lines.forEach((line, i) => {
-        const lineY = startY - i * lineHeight * lineSpacing;
-        const offsets = [-strokeOffset, strokeOffset];
-        offsets.forEach(dx => {
-          offsets.forEach(dy => {
-            firstPage.drawText(line, {
-              x: lineX + dx,
-              y: lineY + dy,
-              size: fontSize,
-              font: helveticaFont,
-              color: rgb(1, 1, 1, strokeOpacity),
-            });
-          });
-        });
-        firstPage.drawText(line, {
-          x: lineX,
-          y: lineY,
-          size: fontSize,
-          font: helveticaFont,
-          color: rgb(0.1, 0.1, 0.1),
-       });
-      });
-    } else if (element.type === 'image') {
-            await addImageToPdf(pdfDoc, element.content, position, reuseEmbeddedImagesMap);
-        }
-    });
+    
+function calculateYOffset(linesCount) {
+  if (linesCount <= 4) {
+    return 17;
+  } else {
+    return 17 + (linesCount - 4) * 7;
+  }
 }
 
-// Adjust the addImageToPdf function to use reuseEmbeddedImagesMap for handling images efficiently
-async function addImageToPdf(pdfDoc, pathObject, position, reuseEmbeddedImagesMap) {
-    const imagePath = pathObject.path; 
-    const imageType = path.extname(pathObject.originalFilename).substring(1).toLowerCase(); 
-    let pdfImage;
-    if (reuseEmbeddedImagesMap.has(imagePath)) {
-        pdfImage = reuseEmbeddedImagesMap.get(imagePath);
-    } else {
-        const imageBytes = await fs.readFile(imagePath);
-        pdfImage = imageType === 'jpg' ? await pdfDoc.embedJpg(imageBytes) : await pdfDoc.embedPng(imageBytes);
-        reuseEmbeddedImagesMap.set(imagePath, pdfImage);
-    }
+let startY;
+if (lines.length === 1) {
+  startY = position.y + (maxHeight - lineHeight) / 2;
+} else {
+  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+  const yOffset = calculateYOffset(lines.length);
+  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+}
 
-    // Assume default page handling, which needs adjustment per your pagination logic
-    const page = pdfDoc.getPages()[0];
-    page.drawImage(pdfImage, {
-        x: position.x,
-        y: position.y,
-        width: 100,
-        height: 100
+    const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
+      return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
+          ? currentIndex
+          : maxIndex;
+    }, 0);
+
+    const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
+    const lineX = position.x + (maxWidth - longestLineWidth) / 2;
+
+    lines.forEach((line, i) => {
+      const lineY = startY - i * lineHeight * lineSpacing;
+      const offsets = [-strokeOffset, strokeOffset];
+      offsets.forEach(dx => {
+        offsets.forEach(dy => {
+          firstPage.drawText(line, {
+            x: lineX + dx,
+            y: lineY + dy,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(1, 1, 1, strokeOpacity),
+          });
+        });
+      });
+      firstPage.drawText(line, {
+        x: lineX,
+        y: lineY,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(0.1, 0.1, 0.1),
+      });
     });
+  });
 }
 
 module.exports = { 
-    addElementToPdf,
+    addTextToPdf,
     addImageToPdf 
 };

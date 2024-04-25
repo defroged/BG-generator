@@ -1,4 +1,4 @@
-const { addElementToPdf, addImageToPdf } = require('../snakesMapper');
+const { addTextToPdf, addImageToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 const formidable = require('formidable');
@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 
   form.parse(req, async (err, fields, files) => {
 	  console.log('Parsed Fields:', fields);
-    console.log('Parsed Files:', files);
+    console.log('Parsed Files:', files);// new logs
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  await addElementToPdf(pdfDoc, fields);
+  await addTextToPdf(pdfDoc, fields);
 
 for (let i = 1; i <= 98; i++) {
   const fileKey = `box${i}Image`;
@@ -76,4 +76,4 @@ function calculateImagePosition(boxIndex) {
 }
 
   });
-};//note
+};
