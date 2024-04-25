@@ -83,36 +83,10 @@ function calculateYOffset(linesCount) {
 }
 
 async function addElementToPdf(pdfDoc, fields) {
-  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-  const pages = pdfDoc.getPages();
-  const firstPage = pages[0];
-  const { width, height } = firstPage.getSize();
-
-  const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
-
-  const userInputTexts = boxKeys.map((boxKey) => {
-    const inputTextArray = fields[boxKey];
-    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  });
-
-  // Create userInputImages array to store image information
-  const imageKeys = Object.keys(fields).filter(key => key.endsWith('Image'));
-  const userInputImages = imageKeys.map((imgKey) => fields[imgKey]);
-
-  // Modify fillTexts to handle both text and images
-  const fillElements = [];
-  const totalElements = userInputTexts.length + userInputImages.length;
-  for (let i = 0; i < 98; i++) {
-    const elIndex = i % totalElements;
-    if (elIndex < userInputTexts.length) {
-      fillElements[i] = { type: 'text', content: userInputTexts[elIndex] };
-    } else {
-      fillElements[i] = { type: 'image', content: userInputImages[elIndex - userInputTexts.length] };
-    }
-  }
-
-  const positions = [
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const reuseEmbeddedImagesMap = new Map();
+	
+	const positions = [
     { x: 140, y: 5 }, // 1
     { x: 210, y: 5 }, // 2
     { x: 280, y: 5 }, // 3
@@ -213,17 +187,32 @@ async function addElementToPdf(pdfDoc, fields) {
 	{ x: 710, y: 537 }, // 98
     ];
 
-  const boxIndices = Array.from({ length: 98 }, (_, i) => i);
-const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
+    // Collect all texts and image descriptors into fillElements
+    const userInputTexts = fields.textInputs; // Assuming this is an array of text entries.
+    const userInputImages = fields.imageInputs.map(img => { // Assuming this is an array of image file descriptions.
+        return {path: img.path, originalFilename: img.originalFilename};
+    });
 
-  for (const randomIndex of shuffledIndices) {
-    const index = shuffledIndices.indexOf(randomIndex);
-    const element = fillElements[index];
-    const position = positions[randomIndex];
-    const strokeOffset = 0.8;
-    const strokeOpacity = 0.5;
+    // Mix texts and images in the fillElements array
+    let fillElements = [];
+    let textIndex = 0, imageIndex = 0;
 
-    if (element.type === 'text') {
+    while (fillElements.length < 98) {
+        if (textIndex < userInputTexts.length) {
+            fillElements.push({ type: 'text', content: userInputTexts[textIndex++] });
+        }
+        if (imageIndex < userInputImages.length) {
+            fillElements.push({ type: 'image', content: userInputImages[imageIndex++] });
+        }
+        // Restart indices if end of either array is reached
+        if (textIndex >= userInputTexts.length) textIndex = 0;
+        if (imageIndex >= userInputImages.length) imageIndex = 0;
+    }
+
+    // Loop over fillElements to process text and images
+    fillElements.forEach(async (element, index) => {
+        const position = positions[index % positions.length]; // Wrap around if more elements than positions
+        if (element.type === 'text') {
       const inputText = element.content;
       const maxWidth = 70;
       const maxHeight = 60;
@@ -272,13 +261,32 @@ const shuffledIndices = boxIndices.sort(() => 0.5 - Math.random());
        });
       });
     } else if (element.type === 'image') {
-      const pathObject = {
-        filepath: element.content.path,
-        originalFilename: element.content.originalFilename,
-      };
-      await addImageToPdf(pdfDoc, pathObject, position);
+            await addImageToPdf(pdfDoc, element.content, position, reuseEmbeddedImagesMap);
+        }
+    });
+}
+
+// Adjust the addImageToPdf function to use reuseEmbeddedImagesMap for handling images efficiently
+async function addImageToPdf(pdfDoc, pathObject, position, reuseEmbeddedImagesMap) {
+    const imagePath = pathObject.path; 
+    const imageType = path.extname(pathObject.originalFilename).substring(1).toLowerCase(); 
+    let pdfImage;
+    if (reuseEmbeddedImagesMap.has(imagePath)) {
+        pdfImage = reuseEmbeddedImagesMap.get(imagePath);
+    } else {
+        const imageBytes = await fs.readFile(imagePath);
+        pdfImage = imageType === 'jpg' ? await pdfDoc.embedJpg(imageBytes) : await pdfDoc.embedPng(imageBytes);
+        reuseEmbeddedImagesMap.set(imagePath, pdfImage);
     }
-  }
+
+    // Assume default page handling, which needs adjustment per your pagination logic
+    const page = pdfDoc.getPages()[0];
+    page.drawImage(pdfImage, {
+        x: position.x,
+        y: position.y,
+        width: 100,
+        height: 100
+    });
 }
 
 module.exports = { 
