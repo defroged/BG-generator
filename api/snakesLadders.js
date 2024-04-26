@@ -40,55 +40,54 @@ async function prepareImagesForProcessing(files) {
 
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.multiples = true;
 
   form.parse(req, async (err, fields, files) => {
-    console.log('Parsed Fields:', fields);
-    console.log('Parsed Files:', files);
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');
       return;
     }
-    console.log('Received Fields:', fields);
+
+    // Process and rename keys for images in the files object
+    let processedFiles = {};
+    Object.keys(files).forEach(key => {
+      // Expected key format is 'box{number}Image'
+      const newKey = key.replace('Image', ''); // Rename key
+      processedFiles[newKey] = files[key];
+    });
 
     try {
-  	  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  	  const pdfDoc = await PDFDocument.load(pdfBytes);
+      const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+
       await addTextToPdf(pdfDoc, fields);
+      const imagesInfo = await prepareImagesForProcessing(processedFiles); // Use the renamed keys
 
-      // Use the function to get images and positions
-      const imagesInfo = await prepareImagesForProcessing(files);
-
-      // Placeholder to process images later
       for (const imageInfo of imagesInfo) {
-        console.log(`Processing image at ${imageInfo.imagePath} for position x: ${imageInfo.position.x}, y: ${imageInfo.position.y}`);
-        // Here you would call addImageToPdf or a similar function to process each image
-        // e.g., await addImageToPdf(pdfDoc, imageInfo.imagePath, imageInfo.position);
+        // Make sure your addImageToPdf function is adjusted to handle the new file structure
+        await addImageToPdf(pdfDoc, imageInfo.imagePath, imageInfo.position);
       }
-
+      
       const newPdfBytes = await pdfDoc.save();
+      const fileName = `${Date.now()}.pdf`;
+      const remoteFile = bucket.file(fileName);
+      await remoteFile.save(Buffer.from(newPdfBytes), {
+        contentType: 'application/pdf'
+      });
 
-  const randomKey = Date.now().toString();
-  const fileName = `${randomKey}.pdf`;
-  console.log('fileName:', fileName);
-  const remoteFile = bucket.file(fileName);
-  console.log('remoteFile:', remoteFile);
-  await remoteFile.save(Buffer.from(newPdfBytes), { contentType: 'application/pdf' });
+      const signedUrlConfig = {
+        action: 'read',
+        expires: '2024-10-03T10:05:00Z',  // Adjust the expiration time as needed
+        responseType: 'attachment'
+      };
 
-  const signedUrlConfig = {
-    action: 'read',
-    expires: Date.now() + 12 * 60 * 60 * 1000,
-    contentDisposition: 'attachment; filename=customized_board_game.pdf',
-  };
-
-  const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
-
-  res.status(200).json({ downloadUrl: downloadUrl[0] });
-
-} catch (error) {
-  console.error(error);
-  res.status(500).send('An error occurred during PDF processing.');
-}
-
+      const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+      res.status(200).json({ downloadUrl: downloadUrl[0] });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('An error occurred during PDF processing.');
+    }
   });
 };
