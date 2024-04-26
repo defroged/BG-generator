@@ -6,12 +6,12 @@ const fs = require('fs').promises;
 
 async function addImageToPdf(pdfDoc, pathObject, position) {
     const imagePath = pathObject.filepath; 
-    const originalFilename = pathObject.originalFilename;  // Use this to get the file type
+    const originalFilename = pathObject.originalFilename;  
 
     console.log('imagePath:', imagePath);
     console.log('originalFilename:', originalFilename);
     const imageBytes = await fs.readFile(imagePath);
-    const imageType = path.extname(originalFilename).substring(1).toLowerCase(); // Extract extension from original filename
+    const imageType = path.extname(originalFilename).substring(1).toLowerCase(); 
     console.log('imageType:', imageType);
 
     let pdfImage;

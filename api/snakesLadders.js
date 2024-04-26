@@ -13,12 +13,31 @@ const storage = new Storage({
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
+// Define the new function here; this assumes 'calculateImagePosition' is available in your script
+async function prepareImagesForProcessing(files) {
+  const imagesInfo = [];
+
+  for (let i = 1; i <= 98; i++) {
+    const fileKey = `box${i}Image`;
+    if (files && files[fileKey]) {
+      const fileObject = files[fileKey][0];
+      const position = calculateImagePosition(i);
+      imagesInfo.push({
+        imagePath: fileObject.filepath,
+        position: position
+      });
+    }
+  }
+
+  return imagesInfo;
+}
+
 module.exports = async (req, res) => {
   const form = new formidable.IncomingForm();
 
   form.parse(req, async (err, fields, files) => {
-	  console.log('Parsed Fields:', fields);
-    console.log('Parsed Files:', files);// new logs
+    console.log('Parsed Fields:', fields);
+    console.log('Parsed Files:', files);
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');
@@ -27,23 +46,21 @@ module.exports = async (req, res) => {
     console.log('Received Fields:', fields);
 
     try {
-  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-  const pdfDoc = await PDFDocument.load(pdfBytes);
+  	  const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+  	  const pdfDoc = await PDFDocument.load(pdfBytes);
+      await addTextToPdf(pdfDoc, fields);
 
-  await addTextToPdf(pdfDoc, fields);
+      // Use the function to get images and positions
+      const imagesInfo = await prepareImagesForProcessing(files);
 
-for (let i = 1; i <= 98; i++) {
-  const fileKey = `box${i}Image`;
-  if (files && files[fileKey]) {
-    const fileObject = files[fileKey][0]; // Pass the entire file object
-    const position = calculateImagePosition(i);
+      // Placeholder to process images later
+      for (const imageInfo of imagesInfo) {
+        console.log(`Processing image at ${imageInfo.imagePath} for position x: ${imageInfo.position.x}, y: ${imageInfo.position.y}`);
+        // Here you would call addImageToPdf or a similar function to process each image
+        // e.g., await addImageToPdf(pdfDoc, imageInfo.imagePath, imageInfo.position);
+      }
 
-    console.log(`Processing image for box ${i}:`, fileObject.filepath);
-    await addImageToPdf(pdfDoc, fileObject, position);
-  }
-}
-
-  const newPdfBytes = await pdfDoc.save();
+      const newPdfBytes = await pdfDoc.save();
 
   const randomKey = Date.now().toString();
   const fileName = `${randomKey}.pdf`;
