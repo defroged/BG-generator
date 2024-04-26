@@ -13,10 +13,17 @@ const storage = new Storage({
 const bucketName = 'bg_pdf_bucket';
 const bucket = storage.bucket(bucketName);
 
+function calculateImagePosition(boxIndex) {
+  const row = Math.floor((boxIndex - 1) % 10);
+  const col = Math.floor((boxIndex - 1) / 10);
+  const x = 20 + col * 70; 
+  const y = 550 - row * 60; 
+  return { x, y };
+}
+
 // Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
-
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}Image`;
     if (files && files[fileKey]) {
@@ -28,7 +35,6 @@ async function prepareImagesForProcessing(files) {
       });
     }
   }
-
   return imagesInfo;
 }
 
@@ -82,14 +88,6 @@ module.exports = async (req, res) => {
 } catch (error) {
   console.error(error);
   res.status(500).send('An error occurred during PDF processing.');
-}
-
-function calculateImagePosition(boxIndex) {
-  const row = Math.floor((boxIndex - 1) % 10);
-  const col = Math.floor((boxIndex - 1) / 10);
-  const x = 20 + col * 70; 
-  const y = 550 - row * 60; 
-  return { x, y };
 }
 
   });
