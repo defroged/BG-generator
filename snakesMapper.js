@@ -4,9 +4,9 @@ const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
 
-async function addImageToPdf(pdfDoc, pathObject, position) {
-    const imagePath = pathObject.filepath; 
-    const originalFilename = pathObject.originalFilename;  
+async function addImageToPdf(pdfDoc, imageInfo, position) {
+    const imagePath = imageInfo.imagePath;
+    const originalFilename = imageInfo.originalFilename;
 
     console.log('imagePath:', imagePath);
     console.log('originalFilename:', originalFilename);

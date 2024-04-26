@@ -25,13 +25,14 @@ function calculateImagePosition(boxIndex) {
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
   for (let i = 1; i <= 98; i++) {
-    const fileKey = `box${i}`; 
-    if (files && files[fileKey]) {
-      const fileObject = files[fileKey][0];
+    const fileKey = `box${i}`;
+    if (files[fileKey]) {
+      const fileObject = files[fileKey]; // Previously was files[fileKey][0], files[fileKey] should be correct if it is not an array
       const position = calculateImagePosition(i);
       imagesInfo.push({
-        imagePath: fileObject.filepath,
-        position: position
+        imagePath: fileObject.filepath, // Make sure this is the correct property
+        originalFilename: fileObject.originalFilename,
+        position
       });
     }
   }
@@ -66,9 +67,8 @@ module.exports = async (req, res) => {
       const imagesInfo = await prepareImagesForProcessing(processedFiles); // Use the renamed keys
 
       for (const imageInfo of imagesInfo) {
-        // Make sure your addImageToPdf function is adjusted to handle the new file structure
-        await addImageToPdf(pdfDoc, imageInfo.imagePath, imageInfo.position);
-      }
+  await addImageToPdf(pdfDoc, imageInfo, imageInfo.position); // Pass the entire imageInfo object
+}
       
       const newPdfBytes = await pdfDoc.save();
       const fileName = `${Date.now()}.pdf`;
