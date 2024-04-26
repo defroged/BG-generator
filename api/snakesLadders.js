@@ -27,12 +27,12 @@ async function prepareImagesForProcessing(files) {
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
     if (files[fileKey]) {
-      const fileObject = files[fileKey]; // Previously was files[fileKey][0], files[fileKey] should be correct if it is not an array
+      const fileObject = files[fileKey][0]; // Ensure you access the first element of the array
       const position = calculateImagePosition(i);
       imagesInfo.push({
-        imagePath: fileObject.filepath, // Make sure this is the correct property
+        imagePath: fileObject.filepath,
         originalFilename: fileObject.originalFilename,
-        position
+        position: position
       });
     }
   }
@@ -45,6 +45,7 @@ module.exports = async (req, res) => {
   form.multiples = true;
 
   form.parse(req, async (err, fields, files) => {
+	   console.log(files); 
     if (err) {
       console.error(err);
       res.status(500).send('Error parsing form data.');

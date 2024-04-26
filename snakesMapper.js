@@ -5,32 +5,36 @@ const fs = require('fs').promises;
 
 
 async function addImageToPdf(pdfDoc, imageInfo, position) {
-    const imagePath = imageInfo.imagePath;
-    const originalFilename = imageInfo.originalFilename;
+  const imagePath = imageInfo.imagePath;
+  const originalFilename = imageInfo.originalFilename;
 
-    console.log('imagePath:', imagePath);
-    console.log('originalFilename:', originalFilename);
-    const imageBytes = await fs.readFile(imagePath);
-    const imageType = path.extname(originalFilename).substring(1).toLowerCase(); 
-    console.log('imageType:', imageType);
+  console.log('Attempting to load image from:', imagePath);
+  console.log('File name:', originalFilename);
 
-    let pdfImage;
-    if (imageType === 'jpg' || imageType === 'jpeg') {
-        pdfImage = await pdfDoc.embedJpg(imageBytes);
-    } else if (imageType === 'png') {
-        pdfImage = await pdfDoc.embedPng(imageBytes);
-    } else {
-        throw new Error('Unsupported image type: ' + imageType);
-    }
+  if (!imagePath || !originalFilename) {
+    throw new Error("Invalid file details. Image path or filename is undefined.");
+  }
 
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    firstPage.drawImage(pdfImage, {
-        x: position.x,
-        y: position.y,
-        width: 100,
-        height: 100
-    });
+  const imageBytes = await fs.readFile(imagePath);
+  const imageType = path.extname(originalFilename).substring(1).toLowerCase();
+
+  let pdfImage;
+  if (imageType === 'jpg' || imageType === 'jpeg') {
+    pdfImage = await pdfDoc.embedJpg(imageBytes);
+  } else if (imageType === 'png') {
+    pdfImage = await pdfDoc.embedPng(imageBytes);
+  } else {
+    throw new Error('Unsupported image type: ' + imageType);
+  }
+
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+  firstPage.drawImage(pdfImage, {
+    x: position.x,
+    y: position.y,
+    width: 100,
+    height: 100
+  });
 }
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
