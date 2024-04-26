@@ -25,7 +25,7 @@ function calculateImagePosition(boxIndex) {
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
   for (let i = 1; i <= 98; i++) {
-    const fileKey = `box${i}Image`;
+    const fileKey = `box${i}`; 
     if (files && files[fileKey]) {
       const fileObject = files[fileKey][0];
       const position = calculateImagePosition(i);
