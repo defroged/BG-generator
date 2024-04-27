@@ -206,7 +206,8 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOpacity = 0.5;
 
   shuffledIndices.forEach((randomIndex, index) => {
-  const inputContent = fields[`box${index + 1}`][0];
+  const fieldContent = fields[`box${index + 1}`];
+  const inputContent = fieldContent ? fieldContent[0] : undefined;
   const position = positions[randomIndex];
 
   if (inputContent && typeof inputContent === "string") {
