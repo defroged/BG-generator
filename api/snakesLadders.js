@@ -90,7 +90,7 @@ module.exports = async (req, res) => {
     const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
 
     for (const imageInfo of imagesInfo) {
-      await addImageToPdf(pdfDoc, imageInfo, imageInfo.position); // Pass the entire imageInfo object
+      await addImageToPdf(pdfDoc, imageInfo); // Pass the entire imageInfo object
     }
 
     const newPdfBytes = await pdfDoc.save();

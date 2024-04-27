@@ -4,7 +4,7 @@ const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
 
-async function addImageToPdf(pdfDoc, imageInfo, position) {
+async function addImageToPdf(pdfDoc, imageInfo) {
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
 
@@ -30,11 +30,11 @@ async function addImageToPdf(pdfDoc, imageInfo, position) {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   firstPage.drawImage(pdfImage, {
-    x: position.x,
-    y: position.y,
-    width: 100,
-    height: 100
-  });
+  x: imageInfo.position.x,
+  y: imageInfo.position.y,
+  width: 100,
+  height: 100
+});
 }
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
