@@ -206,36 +206,38 @@ async function addTextToPdf(pdfDoc, fields) {
   const strokeOpacity = 0.5;
 
   shuffledIndices.forEach((randomIndex, index) => {
-    const inputText = fillTexts[index];
-    const position = positions[randomIndex];
+  const inputContent = fields[`box${index + 1}`][0];
+  const position = positions[randomIndex];
+
+  if (inputContent && typeof inputContent === "string") {
+    // Handle Text
     const maxWidth = 70;
     const maxHeight = 60;
-    const { fontSize, lines } = fitTextToBox(inputText, helveticaFont, 16, maxWidth, maxHeight);
+    const { fontSize, lines } = fitTextToBox(inputContent, helveticaFont, 16, maxWidth, maxHeight);
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    
-function calculateYOffset(linesCount) {
-  if (linesCount <= 4) {
-    return 17;
-  } else {
-    return 17 + (linesCount - 4) * 7;
-  }
-}
+    function calculateYOffset(linesCount) {
+      if (linesCount <= 4) {
+        return 17;
+      } else {
+        return 17 + (linesCount - 4) * 7;
+      }
+    }
 
-let startY;
-if (lines.length === 1) {
-  startY = position.y + (maxHeight - lineHeight) / 2;
-} else {
-  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  const yOffset = calculateYOffset(lines.length);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-}
+    let startY;
+    if (lines.length === 1) {
+      startY = position.y + (maxHeight - lineHeight) / 2;
+    } else {
+      const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+      const yOffset = calculateYOffset(lines.length);
+      startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+    }
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
       return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
-          ? currentIndex
-          : maxIndex;
+        ? currentIndex
+        : maxIndex;
     }, 0);
 
     const longestLineWidth = helveticaFont.widthOfTextAtSize(lines[longestLineIndex], fontSize);
@@ -263,7 +265,16 @@ if (lines.length === 1) {
         color: rgb(0.1, 0.1, 0.1),
       });
     });
-  });
+  } else if (inputContent && typeof inputContent === "object") {
+    // Handle Image
+    const imageInfo = {
+      imagePath: inputContent.filepath,
+      originalFilename: inputContent.originalFilename,
+    };
+
+    addImageToPdf(pdfDoc, imageInfo, position);
+  }
+});
 }
 
 module.exports = { 
