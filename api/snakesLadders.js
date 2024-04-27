@@ -44,7 +44,6 @@ function prepareFormData(files, fields) {
   };
 }
 
-// Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
   for (let i = 1; i <= 98; i++) {
