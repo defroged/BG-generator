@@ -83,8 +83,13 @@ module.exports = async (req, res) => {
   const { fields, files } = preparedData;
 
   try {
-    const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const templatePdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+const templatePdf = await PDFDocument.load(templatePdfBytes);
+
+// Create a new PDFDocument and copy first page of template
+const pdfDoc = await PDFDocument.create();
+const [templatePage] = await pdfDoc.copyPages(templatePdf, [0]);
+pdfDoc.addPage(templatePage);
 
     await addTextToPdf(pdfDoc, fields);
     const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
