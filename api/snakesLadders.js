@@ -49,14 +49,17 @@ async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
-    if (files[fileKey]) {
-      const fileObject = files[fileKey][0]; // Ensure you access the first element of the array
-      const position = calculateImagePosition(i);
-      imagesInfo.push({
-        imagePath: fileObject.filepath,
-        originalFilename: fileObject.originalFilename,
-        position: position
-      });
+    if (files[fileKey] && files[fileKey].length > 0) {
+      const fileObject = files[fileKey][0];
+      
+      if (fileObject && fileObject.filepath && fileObject.originalFilename) {
+        const position = calculateImagePosition(i);
+        imagesInfo.push({
+          imagePath: fileObject.filepath,
+          originalFilename: fileObject.originalFilename,
+          position: position
+        });
+      }
     }
   }
   return imagesInfo;
