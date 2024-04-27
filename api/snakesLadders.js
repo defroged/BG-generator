@@ -68,51 +68,44 @@ module.exports = async (req, res) => {
   form.multiples = true;
 
   form.parse(req, async (err, originalFields, originalFiles) => {
-	   console.log(files); 
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error parsing form data.');
-      return;
+  if (err) {
+    console.error(err);
+    res.status(500).send('Error parsing form data.');
+    return;
+  }
+
+  const preparedData = prepareFormData(originalFiles, originalFields);
+  const { fields, files } = preparedData;
+
+  try {
+    const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+
+    await addTextToPdf(pdfDoc, fields);
+    const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
+
+    for (const imageInfo of imagesInfo) {
+      await addImageToPdf(pdfDoc, imageInfo, imageInfo.position); // Pass the entire imageInfo object
     }
 
-    // Process and rename keys for images in the files object
-    let processedFiles = {};
-    Object.keys(files).forEach(key => {
-      // Expected key format is 'box{number}Image'
-      const newKey = key.replace('Image', ''); // Rename key
-      processedFiles[newKey] = files[key];
+    const newPdfBytes = await pdfDoc.save();
+    const fileName = `${Date.now()}.pdf`;
+    const remoteFile = bucket.file(fileName);
+    await remoteFile.save(Buffer.from(newPdfBytes), {
+      contentType: 'application/pdf'
     });
 
-    try {
-      const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
-      const pdfDoc = await PDFDocument.load(pdfBytes);
+    const signedUrlConfig = {
+      action: 'read',
+      expires: '2024-10-03T10:05:00Z',  // Adjust the expiration time as needed
+      responseType: 'attachment'
+    };
 
-      await addTextToPdf(pdfDoc, fields);
-      const imagesInfo = await prepareImagesForProcessing(processedFiles); // Use the renamed keys
-
-      for (const imageInfo of imagesInfo) {
-  await addImageToPdf(pdfDoc, imageInfo, imageInfo.position); // Pass the entire imageInfo object
-}
-      
-      const newPdfBytes = await pdfDoc.save();
-      const fileName = `${Date.now()}.pdf`;
-      const remoteFile = bucket.file(fileName);
-      await remoteFile.save(Buffer.from(newPdfBytes), {
-        contentType: 'application/pdf'
-      });
-
-      const signedUrlConfig = {
-        action: 'read',
-        expires: '2024-10-03T10:05:00Z',  // Adjust the expiration time as needed
-        responseType: 'attachment'
-      };
-
-      const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
-      res.status(200).json({ downloadUrl: downloadUrl[0] });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('An error occurred during PDF processing.');
-    }
-   const { fields, files } = prepareFormData(originalFiles, originalFields);
+    const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
+    res.status(200).json({ downloadUrl: downloadUrl[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred during PDF processing.');
+  }
 });
 };
