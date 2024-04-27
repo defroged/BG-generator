@@ -88,9 +88,10 @@ async function addTextToPdf(pdfDoc, fields) {
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
   const userInputTexts = boxKeys.map((boxKey) => {
-    const inputTextArray = fields[boxKey];
-    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  });
+  const inputTextArray = fields[boxKey];
+  const value = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+  return typeof value === 'string' ? value : '';
+});
 
   const fillTexts = [];
   for (let i = 0; i < 98; i++) {
