@@ -63,9 +63,11 @@ async function prepareImagesForProcessing(files) {
 }
 
 module.exports = async (req, res) => {
-  const form = new formidable.IncomingForm();
-  form.keepExtensions = true;
-  form.multiples = true;
+  const form = new formidable.IncomingForm({
+  multiples: true,
+  keepExtensions: true,
+  allowEmptyFiles: true,
+});
 
   form.parse(req, async (err, originalFields, originalFiles) => {
   if (err) {
