@@ -84,6 +84,7 @@ module.exports = async (req, res) => {
 
   try {
     const templatePdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+	
 const templatePdf = await PDFDocument.load(templatePdfBytes);
 
 // Create a new PDFDocument and copy first page of template

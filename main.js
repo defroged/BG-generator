@@ -34,8 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
 		console.log(formData);
         for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
+  if (pair[1] instanceof Blob) {
+    console.log(pair[0] + ': Blob with size ' + pair[1].size + ' and type ' + pair[1].type);
+  } else {
+    console.log(pair[0] + ': ' + pair[1]);
+  }
+}
 
         fetch(form.action, {
             method: 'POST',

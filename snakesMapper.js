@@ -7,16 +7,17 @@ const fs = require('fs').promises;
 async function addImageToPdf(pdfDoc, imageInfo) {
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
+  const position = imageInfo.position;
 
-  console.log('Attempting to load image from:', imagePath);
-  console.log('File name:', originalFilename);
+  console.log('Attempting to load image:', imagePath, originalFilename, position);
 
-  if (!imagePath || !originalFilename) {
-    throw new Error("Invalid file details. Image path or filename is undefined.");
+  if (!imagePath || !originalFilename || !position) {
+    throw new Error("Invalid details. Image path, filename or position is missing.");
   }
 
   const imageBytes = await fs.readFile(imagePath);
   const imageType = path.extname(originalFilename).substring(1).toLowerCase();
+  console.log('Image type:', imageType);
 
   let pdfImage;
   if (imageType === 'jpg' || imageType === 'jpeg') {
@@ -29,12 +30,13 @@ async function addImageToPdf(pdfDoc, imageInfo) {
 
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
+  console.log('Drawing the image at position:', position);
   firstPage.drawImage(pdfImage, {
-  x: imageInfo.position.x,
-  y: imageInfo.position.y,
-  width: 100,
-  height: 100
-});
+    x: position.x,
+    y: position.y,
+    width: 100,
+    height: 100,
+  });
 }
 
 function fitTextToBox(text, font, defaultFontSize, maxWidth, maxHeight) {
