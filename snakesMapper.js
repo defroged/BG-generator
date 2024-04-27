@@ -267,5 +267,6 @@ if (lines.length === 1) {
 
 module.exports = { 
     addTextToPdf,
-    addImageToPdf 
+    addImageToPdf,
+    calculateImagePosition
 };

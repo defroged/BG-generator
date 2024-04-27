@@ -21,6 +21,29 @@ function calculateImagePosition(boxIndex) {
   return { x, y };
 }
 
+function prepareFormData(files, fields) {
+  const preparedFiles = {};
+ 
+  for (const key in files) {
+    if (Object.hasOwnProperty.call(files, key)) {
+      const fileData = files[key][0];
+      const newKey = key.replace('image', '');
+ 
+      if (!fields[newKey]) {
+        fields[newKey] = [];
+      }
+ 
+      fields[newKey].push(fileData);
+      preparedFiles[newKey] = fileData;
+    }
+  }
+ 
+  return {
+    fields,
+    files: preparedFiles,
+  };
+}
+
 // Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
@@ -44,7 +67,7 @@ module.exports = async (req, res) => {
   form.keepExtensions = true;
   form.multiples = true;
 
-  form.parse(req, async (err, fields, files) => {
+  form.parse(req, async (err, originalFields, originalFiles) => {
 	   console.log(files); 
     if (err) {
       console.error(err);
@@ -90,5 +113,6 @@ module.exports = async (req, res) => {
       console.error(error);
       res.status(500).send('An error occurred during PDF processing.');
     }
-  });
+   const { fields, files } = prepareFormData(originalFiles, originalFields);
+});
 };
