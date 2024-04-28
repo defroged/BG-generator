@@ -93,11 +93,25 @@ const [templatePage] = await pdfDoc.copyPages(templatePdf, [0]);
 pdfDoc.addPage(templatePage);
 
     await addTextToPdf(pdfDoc, fields);
-    const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
-
-    for (const imageInfo of imagesInfo) {
-      await addImageToPdf(pdfDoc, imageInfo); // Pass the entire imageInfo object
+    for (let i = 1; i <= 98; i++) {
+  const fileKey = `box${i}`;
+  if (files[fileKey] && files[fileKey].length > 0) {
+    const fileObject = files[fileKey][0];
+    if (fileObject && fileObject.filepath && fileObject.originalFilename) {
+      try {
+        const position = calculateImagePosition(i);
+        await addImageToPdf(pdfDoc, {
+          imagePath: fileObject.filepath,
+          originalFilename: fileObject.originalFilename,
+          position: position
+        });
+        console.log(`Embedded image at box${i} with position:`, position);
+      } catch (err) {
+        console.error(`Error processing image at box${i}:`, err);
+      }
     }
+  }
+}
 
     const newPdfBytes = await pdfDoc.save();
     const fileName = `${Date.now()}.pdf`;
