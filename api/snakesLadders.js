@@ -54,6 +54,7 @@ async function prepareImagesForProcessing(files) {
       
       if (fileObject && fileObject.filepath && fileObject.originalFilename) {
         const position = calculateImagePosition(i);
+        console.log(`Image ${i} - Path: ${fileObject.filepath}, Filename: ${fileObject.originalFilename}, Position: (${position.x}, ${position.y})`); // Added debug information
         imagesInfo.push({
           imagePath: fileObject.filepath,
           originalFilename: fileObject.originalFilename,
@@ -83,8 +84,8 @@ module.exports = async (req, res) => {
   const { fields, files } = preparedData;
 
   try {
-    const pdfDoc = await PDFDocument.create();
-const page = pdfDoc.addPage([612, 792]); // Letter size 8.5" x 11"
+    const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+    const pdfDoc = await PDFDocument.load(pdfBytes);
 
     await addTextToPdf(pdfDoc, fields);
     const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
