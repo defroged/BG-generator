@@ -83,7 +83,8 @@ module.exports = async (req, res) => {
   const { fields, files } = preparedData;
 
   try {
-    const templatePdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
+    const pdfDoc = await PDFDocument.create();
+const page = pdfDoc.addPage([pageWidth, pageHeight]);
 	
 const templatePdf = await PDFDocument.load(templatePdfBytes);
 
