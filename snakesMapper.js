@@ -4,20 +4,19 @@ const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
 
-async function addImageToPdf(pdfDoc, imageInfo) {
+async function addImageToPdf(pdfDoc, imageInfo, position) {
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
-  const position = imageInfo.position;
 
-  console.log('Attempting to load image:', imagePath, originalFilename, position);
+  console.log('Attempting to load image from:', imagePath);
+  console.log('File name:', originalFilename);
 
-  if (!imagePath || !originalFilename || !position) {
-    throw new Error("Invalid details. Image path, filename or position is missing.");
+  if (!imagePath || !originalFilename) {
+    throw new Error("Invalid file details. Image path or filename is undefined.");
   }
 
   const imageBytes = await fs.readFile(imagePath);
   const imageType = path.extname(originalFilename).substring(1).toLowerCase();
-  console.log('Image type:', imageType);
 
   let pdfImage;
   if (imageType === 'jpg' || imageType === 'jpeg') {
@@ -30,12 +29,11 @@ async function addImageToPdf(pdfDoc, imageInfo) {
 
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
-  console.log('Drawing the image at position:', position);
   firstPage.drawImage(pdfImage, {
     x: position.x,
     y: position.y,
     width: 100,
-    height: 100,
+    height: 100
   });
 }
 

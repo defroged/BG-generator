@@ -16,8 +16,8 @@ const bucket = storage.bucket(bucketName);
 function calculateImagePosition(boxIndex) {
   const row = Math.floor((boxIndex - 1) % 10);
   const col = Math.floor((boxIndex - 1) / 10);
-  const x = 70 + col * 70;
-  const y = 700 - row * 60;
+  const x = 20 + col * 70; 
+  const y = 550 - row * 60; 
   return { x, y };
 }
 
@@ -84,35 +84,14 @@ module.exports = async (req, res) => {
 
   try {
     const pdfDoc = await PDFDocument.create();
-const page = pdfDoc.addPage([pageWidth, pageHeight]);
-	
-const templatePdf = await PDFDocument.load(templatePdfBytes);
-
-// Create a new PDFDocument and copy first page of template
-const pdfDoc = await PDFDocument.create();
-const [templatePage] = await pdfDoc.copyPages(templatePdf, [0]);
-pdfDoc.addPage(templatePage);
+const page = pdfDoc.addPage([612, 792]); // Letter size 8.5" x 11"
 
     await addTextToPdf(pdfDoc, fields);
-    for (let i = 1; i <= 98; i++) {
-  const fileKey = `box${i}`;
-  if (files[fileKey] && files[fileKey].length > 0) {
-    const fileObject = files[fileKey][0];
-    if (fileObject && fileObject.filepath && fileObject.originalFilename) {
-      try {
-        const position = calculateImagePosition(i);
-        await addImageToPdf(pdfDoc, {
-          imagePath: fileObject.filepath,
-          originalFilename: fileObject.originalFilename,
-          position: position
-        });
-        console.log(`Embedded image at box${i} with position:`, position);
-      } catch (err) {
-        console.error(`Error processing image at box${i}:`, err);
-      }
+    const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
+
+    for (const imageInfo of imagesInfo) {
+      await addImageToPdf(pdfDoc, imageInfo, imageInfo.position); // Pass the entire imageInfo object
     }
-  }
-}
 
     const newPdfBytes = await pdfDoc.save();
     const fileName = `${Date.now()}.pdf`;
