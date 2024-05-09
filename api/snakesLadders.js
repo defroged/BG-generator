@@ -49,23 +49,26 @@ function prepareFormData(files, fields) {
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
   for (let i = 1; i <= 98; i++) {
-	  console.log(`Checking for image at key: box${i}`);
     const fileKey = `box${i}`;
+    console.log(`Checking for file at key: ${fileKey}`);
     if (files[fileKey] && files[fileKey].length > 0) {
       const fileObject = files[fileKey][0];
-      
+      console.log(`Found fileObject for key ${fileKey}:`, fileObject);
+
       if (fileObject && fileObject.filepath && fileObject.originalFilename) {
-		   console.log(`Image ${i} - Original file path: ${fileObject.filepath}`); // Log the image's file path
         const position = calculateImagePosition(i);
-        console.log(`Image ${i} - Path: ${fileObject.filepath}, Filename: ${fileObject.originalFilename}, Position: (${position.x}, ${position.y})`); // Added debug information
+        console.log(`Image ${i} - Path: ${fileObject.filepath}, Filename: ${fileObject.originalFilename}, Position: (${position.x}, ${position.y})`);
+
         imagesInfo.push({
           imagePath: fileObject.filepath,
           originalFilename: fileObject.originalFilename,
-          position: position
+          position: position,
         });
-       } else {
+      } else {
         console.log(`Image ${i} - Invalid file object, filepath or originalFilename missing`); // Log if invalid file object is detected
       }
+    } else {
+      console.log(`No file found for key: ${fileKey}`);
     }
   }
   return imagesInfo;
