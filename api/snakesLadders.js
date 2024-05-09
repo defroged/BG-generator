@@ -49,6 +49,7 @@ function prepareFormData(files, fields) {
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
   for (let i = 1; i <= 98; i++) {
+	  console.log(`Checking for image at key: box${i}`);
     const fileKey = `box${i}`;
     if (files[fileKey] && files[fileKey].length > 0) {
       const fileObject = files[fileKey][0];
@@ -92,6 +93,7 @@ module.exports = async (req, res) => {
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
     await addTextToPdf(pdfDoc, fields);
+	console.log('Preparing Images for Processing');
     const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
 
     for (const imageInfo of imagesInfo) {
