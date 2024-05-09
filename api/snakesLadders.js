@@ -28,6 +28,7 @@ function prepareFormData(files, fields) {
     if (Object.hasOwnProperty.call(files, key)) {
       const fileData = files[key][0];
       const newKey = key.replace('image', '');
+	  console.log(`Processing file: ${fileData.originalFilename}`); // Log filename being processed
  
       if (!fields[newKey]) {
         fields[newKey] = [];
@@ -53,6 +54,7 @@ async function prepareImagesForProcessing(files) {
       const fileObject = files[fileKey][0];
       
       if (fileObject && fileObject.filepath && fileObject.originalFilename) {
+		   console.log(`Image ${i} - Original file path: ${fileObject.filepath}`); // Log the image's file path
         const position = calculateImagePosition(i);
         console.log(`Image ${i} - Path: ${fileObject.filepath}, Filename: ${fileObject.originalFilename}, Position: (${position.x}, ${position.y})`); // Added debug information
         imagesInfo.push({
@@ -60,6 +62,8 @@ async function prepareImagesForProcessing(files) {
           originalFilename: fileObject.originalFilename,
           position: position
         });
+       } else {
+        console.log(`Image ${i} - Invalid file object, filepath or originalFilename missing`); // Log if invalid file object is detected
       }
     }
   }
