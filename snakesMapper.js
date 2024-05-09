@@ -4,9 +4,10 @@ const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
 
-async function addImageToPdf(pdfDoc, imageInfo, position) {
+async function addImageToPdf(pdfDoc, imageInfo) {
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
+  const position = imageInfo.position; // Add this line to get the position from imageInfo
 
   console.log('Attempting to load image from:', imagePath);
   console.log('File name:', originalFilename);
