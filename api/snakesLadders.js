@@ -65,7 +65,8 @@ async function prepareImagesForProcessing(files) {
         const imageInfo = {
     imagePath: fileObject.filepath,
     originalFilename: fileObject.name,
-    position: position
+    position: position,
+    contentType: fileObject.contentType // add this line
 };
 console.log('ImageInfo:', JSON.stringify(imageInfo, null, 2));
 imagesInfo.push(imageInfo);
