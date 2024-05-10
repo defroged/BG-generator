@@ -64,6 +64,7 @@ async function prepareImagesForProcessing(files) {
       }
     }
   }
+  console.log('Processed images:', imagesInfo);
   return imagesInfo;
 }
 
@@ -79,7 +80,7 @@ module.exports = async (req, res) => {
       res.status(500).send('Error parsing form data.');
       return;
     }
-
+ console.log('Uploaded files:', originalFiles);
     const preparedData = prepareFormData(originalFiles, originalFields);
     const { fields, files } = preparedData;
 
