@@ -1,4 +1,4 @@
-const mime = require('mime');
+const mime = require('mime-types');
 const { addTextToPdf, addImageToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;

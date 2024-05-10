@@ -15,6 +15,7 @@
     "fontkit": "^2.0.2",
     "formidable": "^3.5.1",
     "mime": "^4.0.3",
+    "mime-types": "^2.1.35",
     "node-fetch": "^3.3.2",
     "pdf-lib": "^1.17.1"
   }
