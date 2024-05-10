@@ -88,7 +88,7 @@ function addNewInput() {
     const newUploadButton = document.createElement('input');
     newUploadButton.type = 'file';
     newUploadButton.id = `image${inputCount + 1}`;
-    newUploadButton.name = `box${inputCount + 1}`;
+    newUploadButton.name = `box${inputCount + 1}Image`;
     newUploadButton.accept = 'image/*';
     newUploadButton.addEventListener('change', function (event) {
         disableOtherInput(event.target, true);
