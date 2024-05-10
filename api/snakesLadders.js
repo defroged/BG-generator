@@ -89,6 +89,9 @@ module.exports = async (req, res) => {
   allowEmptyFiles: true,
 });
 
+console.log("Request headers:", req.headers);
+console.log("Request content type:", req.headers["content-type"]);
+
   form.parse(req, async (err, originalFields, originalFiles) => {
   if (err) {
     console.error(err);
