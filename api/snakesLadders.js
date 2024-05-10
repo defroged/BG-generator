@@ -98,7 +98,8 @@ console.log("Request content type:", req.headers["content-type"]);
     res.status(500).send('Error parsing form data.');
     return;
   }
-
+    console.log('Original files:', JSON.stringify(originalFiles, null, 2)); // Add this line
+    console.log('Original fields:', JSON.stringify(originalFields, null, 2)); // Add this line
   const preparedData = prepareFormData(originalFiles, originalFields);
   const { fields, files } = preparedData;
 
