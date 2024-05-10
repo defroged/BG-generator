@@ -62,14 +62,15 @@ async function prepareImagesForProcessing(files) {
         const position = calculateImagePosition(i);
         console.log(`Image ${i} - Position: (${position.x}, ${position.y}), Image Path: ${fileObject.filepath}, Image Name: ${fileObject.name}`);
 
-        imagesInfo.push({
-		  console.log('ImageInfo:', imageInfo);
-          imagePath: fileObject.filepath,
-          originalFilename: fileObject.name, // Change this line to 'fileObject.name'
-          position: position,
-        });
+        const imageInfo = {
+    imagePath: fileObject.filepath,
+    originalFilename: fileObject.name,
+    position: position
+};
+console.log('ImageInfo:', JSON.stringify(imageInfo, null, 2));
+imagesInfo.push(imageInfo);
       } else {
-        console.log(`Image ${i} - Invalid file object, filepath or name missing`); // Change this log message to 'name missing'
+        console.log(`Image ${i} - Invalid file object, filepath or name missing`); 
       }
     } else {
       console.log(`No file found for key: ${fileKey}`);
