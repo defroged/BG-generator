@@ -48,6 +48,13 @@ function prepareFormData(files, fields) {
   };
 }
 
+function replacer(key, value) {
+  if (key === 'filepath') {
+    return undefined;
+  }
+  return value;
+}
+
 // Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
@@ -63,7 +70,7 @@ async function prepareImagesForProcessing(files) {
         console.log(`Image ${i} - Position: (${position.x}, ${position.y}), Image Path: ${fileObject.filepath}, Image Name: ${fileObject.name}`);
 
         imagesInfo.push({
-		  console.log('ImageInfo:', JSON.stringify(imageInfo, null, 2));
+		  console.log('ImageInfo:', JSON.stringify(imageInfo, replacer, 2));
           imagePath: fileObject.filepath,
           originalFilename: fileObject.name, // Change this line to 'fileObject.name'
           position: position,
@@ -101,7 +108,7 @@ module.exports = async (req, res) => {
 
     await addTextToPdf(pdfDoc, fields);
 	console.log('Preparing Images for Processing');
-	console.log('Files:', JSON.stringify(files, null, 2));
+	console.log('Files:', JSON.stringify(files, replacer, 2));
     const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
 
     for (const imageInfo of imagesInfo) {
