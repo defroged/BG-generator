@@ -17,13 +17,13 @@ async function addImageToPdf(pdfDoc, imageInfo) {
   }
 
   const imageBytes = await fs.readFile(imagePath);
-  const imageType = path.extname(originalFilename).substring(1).toLowerCase();
+  const contentType = imageInfo.contentType;
 
-  let pdfImage;
-  if (imageType === 'jpg' || imageType === 'jpeg') {
+let pdfImage;
+if (contentType === 'image/jpeg') {
     console.log("Embedding image as JPEG."); // Add this line
     pdfImage = await pdfDoc.embedJpg(imageBytes);
-  } else if (imageType === 'png') {
+  } else if (contentType === 'image/png') {
     console.log("Embedding image as PNG."); // Add this line
     pdfImage = await pdfDoc.embedPng(imageBytes);
   } else {

@@ -28,7 +28,9 @@ function prepareFormData(files, fields) {
     if (Object.hasOwnProperty.call(files, key)) {
       const fileData = files[key][0];
       const newKey = key.replace('image', '');
-	  console.log(`Processing file: ${fileData.originalFilename}`); // Log filename being processed
+	  fileData.contentType = fileData.headers['content-type'];
+      console.log(`Image - Image ContentType: ${fileData.contentType}`);
+	  
  
       if (!fields[newKey]) {
         fields[newKey] = [];
