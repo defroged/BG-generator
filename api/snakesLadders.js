@@ -29,7 +29,7 @@ function prepareFormData(files, fields) {
     if (Object.hasOwnProperty.call(files, key)) {
       const fileData = files[key][0];
       const newKey = key.replace('image', '');
-      fileData.contentType = mime.lookup(fileData.name);
+      fileData.contentType = fileData.mimetype;
 
       if (!fields[newKey]) {
         fields[newKey] = [];
