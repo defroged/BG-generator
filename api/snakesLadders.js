@@ -1,3 +1,4 @@
+const mime = require('mime');
 const { addTextToPdf, addImageToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
@@ -28,7 +29,7 @@ function prepareFormData(files, fields) {
     if (Object.hasOwnProperty.call(files, key)) {
       const fileData = files[key][0];
       const newKey = key.replace('image', '');
-	  fileData.contentType = fileData.headers['content-type'];
+	  fileData.contentType = mime.lookup(fileData.name);
       console.log(`Image - Image ContentType: ${fileData.contentType}`);
 	  
  
