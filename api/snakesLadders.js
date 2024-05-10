@@ -30,7 +30,7 @@ function prepareFormData(files, fields) {
       const fileData = files[key][0];
       const newKey = key.replace('image', '');
 	  fileData.contentType = mime.lookup(fileData.name);
-      console.log(`Image - Image ContentType: ${fileData.contentType}`);
+      console.info(`Image - Image ContentType: ${fileData.contentType}`);
 	  
  
       if (!fields[newKey]) {
@@ -48,35 +48,34 @@ function prepareFormData(files, fields) {
   };
 }
 
-// Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
-  console.log("Total number of keys found:", Object.keys(files).length);
-  console.log("Files object content:", JSON.stringify(files, null, 2));
+  console.info("Total number of keys found:", Object.keys(files).length);
+  console.info("Files object content:", JSON.stringify(files, null, 2));
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
-    console.log(`Checking for file at key: ${fileKey}`);
+    console.info(`Checking for file at key: ${fileKey}`);
     if (files[fileKey] && files[fileKey].length > 0) {
       const fileObject = files[fileKey][0];
-      console.log(`Found fileObject for key ${fileKey}:`, fileObject);
+      console.info(`Found fileObject for key ${fileKey}:`, fileObject);
 
-      if (fileObject && fileObject.filepath && fileObject.name) { // Change this line to 'fileObject.name'
+      if (fileObject && fileObject.filepath && fileObject.name) { 
         const position = calculateImagePosition(i);
-        console.log(`Image ${i} - Position: (${position.x}, ${position.y}), Image Path: ${fileObject.filepath}, Image Name: ${fileObject.name}`);
+        console.info(`Image ${i} - Position: (${position.x}, ${position.y}), Image Path: ${fileObject.filepath}, Image Name: ${fileObject.name}`);
 
         const imageInfo = {
     imagePath: fileObject.filepath,
     originalFilename: fileObject.name,
     position: position,
-    contentType: fileObject.contentType // add this line
+    contentType: fileObject.contentType
 };
-console.log('ImageInfo:', JSON.stringify(imageInfo, null, 2));
+console.info('ImageInfo:', JSON.stringify(imageInfo, null, 2));
 imagesInfo.push(imageInfo);
       } else {
-        console.log(`Image ${i} - Invalid file object, filepath or name missing`); 
+        console.info(`Image ${i} - Invalid file object, filepath or name missing`); 
       }
     } else {
-      console.log(`No file found for key: ${fileKey}`);
+      console.info(`No file found for key: ${fileKey}`);
     }
   }
   return imagesInfo;
@@ -89,8 +88,8 @@ module.exports = async (req, res) => {
   allowEmptyFiles: true,
 });
 
-console.log("Request headers:", req.headers);
-console.log("Request content type:", req.headers["content-type"]);
+console.info("Request headers:", req.headers);
+console.info("Request content type:", req.headers["content-type"]);
 
   form.parse(req, async (err, originalFields, originalFiles) => {
   if (err) {
@@ -98,8 +97,8 @@ console.log("Request content type:", req.headers["content-type"]);
     res.status(500).send('Error parsing form data.');
     return;
   }
-    console.log('Original files:', JSON.stringify(originalFiles, null, 2)); // Add this line
-    console.log('Original fields:', JSON.stringify(originalFields, null, 2)); // Add this line
+    console.info('Original files:', JSON.stringify(originalFiles, null, 2)); 
+    console.info('Original fields:', JSON.stringify(originalFields, null, 2)); 
   const preparedData = prepareFormData(originalFiles, originalFields);
   const { fields, files } = preparedData;
 
@@ -108,9 +107,9 @@ console.log("Request content type:", req.headers["content-type"]);
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
     await addTextToPdf(pdfDoc, fields);
-	console.log('Preparing Images for Processing');
-	console.log('Files:', files);
-    const imagesInfo = await prepareImagesForProcessing(files);  // Use the renamed keys
+	console.info('Preparing Images for Processing');
+	console.info('Files:', files);
+    const imagesInfo = await prepareImagesForProcessing(files); 
 
     for (const imageInfo of imagesInfo) {
       await addImageToPdf(pdfDoc, imageInfo);
@@ -125,7 +124,7 @@ console.log("Request content type:", req.headers["content-type"]);
 
     const signedUrlConfig = {
       action: 'read',
-      expires: '2024-10-03T10:05:00Z',  // Adjust the expiration time as needed
+      expires: '2024-10-03T10:05:00Z',
       responseType: 'attachment'
     };
 

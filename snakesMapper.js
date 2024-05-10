@@ -3,6 +3,14 @@ const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
+function streamToBuffer(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on('data', chunk => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+  });
+}
 
 async function addImageToPdf(pdfDoc, imageInfo) {
   console.log('AddImageToPdf - ImageInfo:', imageInfo);
@@ -17,15 +25,15 @@ async function addImageToPdf(pdfDoc, imageInfo) {
     throw new Error("Invalid file details. Image path or filename is undefined.");
   }
 
-  const imageBytes = await fs.readFile(imagePath);
+  const imageBytes = await streamToBuffer(fs.createReadStream(imagePath));
   const contentType = imageInfo.contentType;
 
 let pdfImage;
 if (contentType === 'image/jpeg') {
-    console.log("Embedding image as JPEG."); // Add this line
+    console.log("Embedding image as JPEG."); 
     pdfImage = await pdfDoc.embedJpg(imageBytes);
   } else if (contentType === 'image/png') {
-    console.log("Embedding image as PNG."); // Add this line
+    console.log("Embedding image as PNG."); 
     pdfImage = await pdfDoc.embedPng(imageBytes);
   } else {
     throw new Error('Unsupported image type: ' + imageType);
