@@ -13,7 +13,7 @@ function streamToBuffer(stream) {
 }
 
 async function addImageToPdf(pdfDoc, imageInfo) {
-  const imagePath = imageInfo.imagePath;
+  const imagePath = imageInfo.filepath;
   const originalFilename = imageInfo.originalFilename;
   const position = imageInfo.position;
   if (!imagePath || !originalFilename) {

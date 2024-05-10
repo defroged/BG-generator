@@ -53,8 +53,7 @@ async function prepareImagesForProcessing(files) {
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
 	console.log("Current key: " + fileKey); 
-    const imageFileKey = `${fileKey}Image`;
-    if (files[imageFileKey] && files[imageFileKey].length > 0) {
+    if (files[fileKey] && files[fileKey].length > 0) {
 		console.log(`Processing file ${fileKey}:`, files[fileKey]);
       const fileObject = files[fileKey][0];
       if (fileObject && fileObject.filepath && fileObject.name) {
