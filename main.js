@@ -87,7 +87,7 @@ function addNewInput() {
 
     const newUploadButton = document.createElement('input');
     newUploadButton.type = 'file';
-    newUploadButton.id = `image${inputCount + 1}`;
+    newUploadButton.id = `box${inputCount + 1}Image`;
     newUploadButton.name = `box${inputCount + 1}Image`;
     newUploadButton.accept = 'image/*';
     newUploadButton.addEventListener('change', function (event) {
@@ -105,7 +105,7 @@ document.getElementById('box1').addEventListener('input', function (event) {
     disableOtherInput(event.target, false);
 });
 
-document.getElementById('image1').addEventListener('change', function (event) {
+document.getElementById('box1Image').addEventListener('change', function (event) {
     disableOtherInput(event.target, true);
 });
 document.addEventListener('keydown', (e) => {
