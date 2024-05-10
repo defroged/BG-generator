@@ -23,8 +23,8 @@ async function addImageToPdf(pdfDoc, imageInfo) {
   const imageBytes = await streamToBuffer(fs.createReadStream(imagePath));
   const contentType = imageInfo.contentType;
 
-let pdfImage;
-if (contentType === 'image/jpeg') {
+  let pdfImage;
+  if (contentType === 'image/jpeg') {
     pdfImage = await pdfDoc.embedJpg(imageBytes);
   } else if (contentType === 'image/png') {
     pdfImage = await pdfDoc.embedPng(imageBytes);
@@ -93,10 +93,10 @@ async function addTextToPdf(pdfDoc, fields) {
   const boxKeys = Object.keys(fields).filter(key => key.startsWith('box'));
 
   const userInputTexts = boxKeys.map((boxKey) => {
-  const inputTextArray = fields[boxKey];
-  const value = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-  return typeof value === 'string' ? value : '';
-});
+    const inputTextArray = fields[boxKey];
+    const value = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
+    return typeof value === 'string' ? value : '';
+  });
 
   const fillTexts = [];
   for (let i = 0; i < 98; i++) {
@@ -219,23 +219,22 @@ async function addTextToPdf(pdfDoc, fields) {
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    
-function calculateYOffset(linesCount) {
-  if (linesCount <= 4) {
-    return 17;
-  } else {
-    return 17 + (linesCount - 4) * 7;
-  }
-}
+    function calculateYOffset(linesCount) {
+      if (linesCount <= 4) {
+        return 17;
+      } else {
+        return 17 + (linesCount - 4) * 7;
+      }
+    }
 
-let startY;
-if (lines.length === 1) {
-  startY = position.y + (maxHeight - lineHeight) / 2;
-} else {
-  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-  const yOffset = calculateYOffset(lines.length);
-  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-}
+    let startY;
+    if (lines.length === 1) {
+      startY = position.y + (maxHeight - lineHeight) / 2;
+    } else {
+      const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+      const yOffset = calculateYOffset(lines.length);
+      startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+    }
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
       return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
