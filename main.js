@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); 
         
         const formData = new FormData(form);
-		console.log(formData);
         for (let pair of formData.entries()) {
   if (pair[1] instanceof Blob) {
     console.log(pair[0] + ': Blob with size ' + pair[1].size + ' and type ' + pair[1].type);

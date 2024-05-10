@@ -13,14 +13,9 @@ function streamToBuffer(stream) {
 }
 
 async function addImageToPdf(pdfDoc, imageInfo) {
-  console.log('AddImageToPdf - ImageInfo:', imageInfo);
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
   const position = imageInfo.position;
-
-  console.log('Attempting to load image from:', imagePath);
-  console.log('File name:', originalFilename);
-
   if (!imagePath || !originalFilename) {
     throw new Error("Invalid file details. Image path or filename is undefined.");
   }
@@ -30,10 +25,8 @@ async function addImageToPdf(pdfDoc, imageInfo) {
 
 let pdfImage;
 if (contentType === 'image/jpeg') {
-    console.log("Embedding image as JPEG."); 
     pdfImage = await pdfDoc.embedJpg(imageBytes);
   } else if (contentType === 'image/png') {
-    console.log("Embedding image as PNG."); 
     pdfImage = await pdfDoc.embedPng(imageBytes);
   } else {
     throw new Error('Unsupported image type: ' + imageType);

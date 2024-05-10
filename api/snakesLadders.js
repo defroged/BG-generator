@@ -21,7 +21,7 @@ function calculateImagePosition(boxIndex) {
   const y = 550 - row * 60; 
   return { x, y };
 }
-// delete me
+
 function prepareFormData(files, fields) {
   const preparedFiles = {};
  
@@ -29,9 +29,7 @@ function prepareFormData(files, fields) {
     if (Object.hasOwnProperty.call(files, key)) {
       const fileData = files[key][0];
       const newKey = key.replace('image', '');
-	  fileData.contentType = mime.lookup(fileData.name);
-      console.info(`Image - Image ContentType: ${fileData.contentType}`);
-	  
+	  fileData.contentType = mime.lookup(fileData.name);	  
  
       if (!fields[newKey]) {
         fields[newKey] = [];
@@ -50,26 +48,18 @@ function prepareFormData(files, fields) {
 
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
-  console.info("Total number of keys found:", Object.keys(files).length);
-  console.info("Files object content:", JSON.stringify(files, null, 2));
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
-    console.info(`Checking for file at key: ${fileKey}`);
     if (files[fileKey] && files[fileKey].length > 0) {
       const fileObject = files[fileKey][0];
-      console.info(`Found fileObject for key ${fileKey}:`, fileObject);
-
       if (fileObject && fileObject.filepath && fileObject.name) { 
         const position = calculateImagePosition(i);
-        console.info(`Image ${i} - Position: (${position.x}, ${position.y}), Image Path: ${fileObject.filepath}, Image Name: ${fileObject.name}`);
-
         const imageInfo = {
     imagePath: fileObject.filepath,
     originalFilename: fileObject.name,
     position: position,
     contentType: fileObject.contentType
 };
-console.info('ImageInfo:', JSON.stringify(imageInfo, null, 2));
 imagesInfo.push(imageInfo);
       } else {
         console.info(`Image ${i} - Invalid file object, filepath or name missing`); 
@@ -88,17 +78,13 @@ module.exports = async (req, res) => {
   allowEmptyFiles: true,
 });
 
-console.info("Request headers:", req.headers);
-console.info("Request content type:", req.headers["content-type"]);
-
   form.parse(req, async (err, originalFields, originalFiles) => {
   if (err) {
     console.error(err);
     res.status(500).send('Error parsing form data.');
     return;
   }
-    console.info('Original files:', JSON.stringify(originalFiles, null, 2)); 
-    console.info('Original fields:', JSON.stringify(originalFields, null, 2)); 
+
   const preparedData = prepareFormData(originalFiles, originalFields);
   const { fields, files } = preparedData;
 
@@ -107,8 +93,6 @@ console.info("Request content type:", req.headers["content-type"]);
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
     await addTextToPdf(pdfDoc, fields);
-	console.info('Preparing Images for Processing');
-	console.info('Files:', files);
     const imagesInfo = await prepareImagesForProcessing(files); 
 
     for (const imageInfo of imagesInfo) {
