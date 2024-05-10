@@ -57,7 +57,7 @@ async function prepareImagesForProcessing(files) {
 
       if (fileObject && fileObject.filepath && fileObject.name) { // Change this line to 'fileObject.name'
         const position = calculateImagePosition(i);
-        console.log(`Image ${i} - Path: ${fileObject.filepath}, Filename: ${fileObject.name}, Position: (${position.x}, ${position.y})`);
+        console.log(`Image ${i} - Position: (${position.x}, ${position.y}), Image Path: ${fileObject.filepath}, Image Name: ${fileObject.name}`);
 
         imagesInfo.push({
           imagePath: fileObject.filepath,

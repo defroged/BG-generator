@@ -7,7 +7,7 @@ const fs = require('fs').promises;
 async function addImageToPdf(pdfDoc, imageInfo) {
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
-  const position = imageInfo.position; // Add this line to get the position from imageInfo
+  const position = imageInfo.position;
 
   console.log('Attempting to load image from:', imagePath);
   console.log('File name:', originalFilename);
@@ -21,8 +21,10 @@ async function addImageToPdf(pdfDoc, imageInfo) {
 
   let pdfImage;
   if (imageType === 'jpg' || imageType === 'jpeg') {
+    console.log("Embedding image as JPEG."); // Add this line
     pdfImage = await pdfDoc.embedJpg(imageBytes);
   } else if (imageType === 'png') {
+    console.log("Embedding image as PNG."); // Add this line
     pdfImage = await pdfDoc.embedPng(imageBytes);
   } else {
     throw new Error('Unsupported image type: ' + imageType);
