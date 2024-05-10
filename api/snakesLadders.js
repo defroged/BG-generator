@@ -49,8 +49,10 @@ function prepareFormData(files, fields) {
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
    console.log('All files:', files); 
+   console.log("Processing box files"); 
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
+	console.log("Current key: " + fileKey); 
     if (files[fileKey] && files[fileKey].length > 0) {
 		console.log(`Processing file ${fileKey}:`, files[fileKey]);
       const fileObject = files[fileKey][0];
@@ -66,6 +68,7 @@ async function prepareImagesForProcessing(files) {
       }
     }
   }
+  console.log("Finished processing box files"); 
   console.log('Processed images:', imagesInfo);
   return imagesInfo;
 }
