@@ -24,7 +24,8 @@ function toggleNav() {
         eslLink.style.left = "260px";
     }
 }
- /* Handling the form and PDF generator*/
+
+ /* Handling the form and PDF generator */
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('customizationForm');
     
@@ -32,13 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); 
         
         const formData = new FormData(form);
-        for (let pair of formData.entries()) {
-  if (pair[1] instanceof Blob) {
-    console.log(pair[0] + ': Blob with size ' + pair[1].size + ' and type ' + pair[1].type);
-  } else {
-    console.log(pair[0] + ': ' + pair[1]);
-  }
-}
 
         fetch(form.action, {
             method: 'POST',
