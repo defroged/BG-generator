@@ -48,9 +48,11 @@ function prepareFormData(files, fields) {
 
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
+   console.log('All files:', files); 
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
     if (files[fileKey] && files[fileKey].length > 0) {
+		console.log(`Processing file ${fileKey}:`, files[fileKey]);
       const fileObject = files[fileKey][0];
       if (fileObject && fileObject.filepath && fileObject.name) {
         const position = calculateImagePosition(i);
