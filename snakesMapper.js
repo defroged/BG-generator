@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 
 
 async function addImageToPdf(pdfDoc, imageInfo) {
+  console.log('AddImageToPdf - ImageInfo:', JSON.stringify(imageInfo, null, 2));
   const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
   const position = imageInfo.position;
