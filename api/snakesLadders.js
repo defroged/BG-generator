@@ -21,7 +21,7 @@ function calculateImagePosition(boxIndex) {
   const y = 550 - row * 60; 
   return { x, y };
 }
-
+// delete me
 function prepareFormData(files, fields) {
   const preparedFiles = {};
  
