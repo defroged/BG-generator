@@ -51,6 +51,8 @@ function prepareFormData(files, fields) {
 // Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
+  console.log("Total number of keys found:", Object.keys(files).length);
+  console.log("Files object content:", JSON.stringify(files, null, 2));
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
     console.log(`Checking for file at key: ${fileKey}`);
