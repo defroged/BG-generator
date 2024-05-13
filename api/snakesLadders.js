@@ -1,4 +1,3 @@
-const mime = require('mime-types');
 const { addTextToPdf, addImageToPdf } = require('../snakesMapper');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
@@ -17,104 +16,78 @@ const bucket = storage.bucket(bucketName);
 function calculateImagePosition(boxIndex) {
   const row = Math.floor((boxIndex - 1) % 10);
   const col = Math.floor((boxIndex - 1) / 10);
-  const x = 20 + col * 70;
-  const y = 550 - row * 60;
+  const x = 20 + col * 70; 
+  const y = 550 - row * 60; 
   return { x, y };
 }
 
-function prepareFormData(files, fields) {
-  const preparedFiles = {};
-
-  for (const key in files) {
-    if (Object.hasOwnProperty.call(files, key)) {
-      const fileData = files[key][0];
-      const newKey = key.replace('image', '');
-      fileData.contentType = fileData.mimetype;
-
-      if (!fields[newKey]) {
-        fields[newKey] = [];
-      }
-
-      fields[newKey].push(fileData);
-      preparedFiles[newKey] = fileData;
-    }
-  }
-
-  return {
-    fields,
-    files: preparedFiles,
-  };
-}
-
+// Define the new function here; this assumes 'calculateImagePosition' is available in your script
 async function prepareImagesForProcessing(files) {
   const imagesInfo = [];
-  console.log('All files:', files);
   for (let i = 1; i <= 98; i++) {
     const fileKey = `box${i}`;
-    console.log("Current key: " + fileKey);
-    if (files[fileKey] && files[fileKey][0]) {
-      console.log(`Adding image for ${fileKey}`); // Add this line
-      console.log(`Processing file ${fileKey}:`, files[fileKey]);
-      const fileObject = files[fileKey][0];
-      if (fileObject && fileObject.filepath && fileObject.name) {
-        const position = calculateImagePosition(i);
-        const imageInfo = {
-          imagePath: fileObject.filepath,
-          originalFilename: fileObject.name,
-          position: position,
-          contentType: fileObject.contentType,
-        };
-        imagesInfo.push(imageInfo);
-      }
+    if (files[fileKey]) {
+      const fileObject = files[fileKey][0]; // Ensure you access the first element of the array
+      const position = calculateImagePosition(i);
+      imagesInfo.push({
+        imagePath: fileObject.filepath,
+        originalFilename: fileObject.originalFilename,
+        position: position
+      });
     }
   }
-  console.log('Processed images:', imagesInfo);
   return imagesInfo;
 }
 
 module.exports = async (req, res) => {
-  const form = new formidable.IncomingForm({
-    multiples: true,
-    keepExtensions: true,
-    allowEmptyFiles: true,
-  });
+  const form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.multiples = true;
 
-  form.parse(req, async (err, originalFields, originalFiles) => {
+  form.parse(req, async (err, fields, files) => {
+	   console.log(files); 
     if (err) {
+      console.error(err);
       res.status(500).send('Error parsing form data.');
       return;
     }
- console.log('Uploaded files:', originalFiles);
-    const preparedData = prepareFormData(originalFiles, originalFields);
-    const { fields, files } = preparedData;
+
+    // Process and rename keys for images in the files object
+    let processedFiles = {};
+    Object.keys(files).forEach(key => {
+      // Expected key format is 'box{number}Image'
+      const newKey = key.replace('Image', ''); // Rename key
+      processedFiles[newKey] = files[key];
+    });
 
     try {
       const pdfBytes = await fs.readFile(path.join(process.cwd(), 'assets', 'snakesAndLaddersTemplate.pdf'));
       const pdfDoc = await PDFDocument.load(pdfBytes);
 
       await addTextToPdf(pdfDoc, fields);
-      const imagesInfo = await prepareImagesForProcessing(files);
+      const imagesInfo = await prepareImagesForProcessing(processedFiles); // Use the renamed keys
 
       for (const imageInfo of imagesInfo) {
-        await addImageToPdf(pdfDoc, imageInfo);
-      }
-
+  await addImageToPdf(pdfDoc, imageInfo, imageInfo.position); // Pass the entire imageInfo object
+}
+      
       const newPdfBytes = await pdfDoc.save();
       const fileName = `${Date.now()}.pdf`;
       const remoteFile = bucket.file(fileName);
       await remoteFile.save(Buffer.from(newPdfBytes), {
-        contentType: 'application/pdf',
+        contentType: 'application/pdf'
       });
 
       const signedUrlConfig = {
         action: 'read',
-        expires: '2024-10-03T10:05:00Z',
-        responseType: 'attachment',
+        expires: '2024-10-03T10:05:00Z',  // Adjust the expiration time as needed
+        responseType: 'attachment'
       };
 
       const downloadUrl = await remoteFile.getSignedUrl(signedUrlConfig);
       res.status(200).json({ downloadUrl: downloadUrl[0] });
     } catch (error) {
+      console.error(error);
       res.status(500).send('An error occurred during PDF processing.');
     }
   });

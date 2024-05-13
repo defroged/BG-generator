@@ -24,8 +24,7 @@ function toggleNav() {
         eslLink.style.left = "260px";
     }
 }
-
- /* Handling the form and PDF generator */
+ /* Handling the form and PDF generator*/
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('customizationForm');
     
@@ -33,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); 
         
         const formData = new FormData(form);
+		console.log(formData);
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
 
         fetch(form.action, {
             method: 'POST',
@@ -88,7 +91,7 @@ function addNewInput() {
     const newUploadButton = document.createElement('input');
     newUploadButton.type = 'file';
     newUploadButton.id = `image${inputCount + 1}`;
-    newUploadButton.name = `box${inputCount + 1}Image`;
+    newUploadButton.name = `box${inputCount + 1}`;
     newUploadButton.accept = 'image/*';
     newUploadButton.addEventListener('change', function (event) {
         disableOtherInput(event.target, true);

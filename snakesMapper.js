@@ -3,30 +3,25 @@ const fontkit = require('@pdf-lib/fontkit');
 const { rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 
-function streamToBuffer(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on('data', chunk => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-  });
-}
 
-async function addImageToPdf(pdfDoc, imageInfo) {
-  const imagePath = imageInfo.filepath;
+async function addImageToPdf(pdfDoc, imageInfo, position) {
+  const imagePath = imageInfo.imagePath;
   const originalFilename = imageInfo.originalFilename;
-  const position = imageInfo.position;
+
+  console.log('Attempting to load image from:', imagePath);
+  console.log('File name:', originalFilename);
+
   if (!imagePath || !originalFilename) {
     throw new Error("Invalid file details. Image path or filename is undefined.");
   }
 
-  const imageBytes = await streamToBuffer(fs.createReadStream(imagePath));
-  const contentType = imageInfo.contentType;
+  const imageBytes = await fs.readFile(imagePath);
+  const imageType = path.extname(originalFilename).substring(1).toLowerCase();
 
   let pdfImage;
-  if (contentType === 'image/jpeg') {
+  if (imageType === 'jpg' || imageType === 'jpeg') {
     pdfImage = await pdfDoc.embedJpg(imageBytes);
-  } else if (contentType === 'image/png') {
+  } else if (imageType === 'png') {
     pdfImage = await pdfDoc.embedPng(imageBytes);
   } else {
     throw new Error('Unsupported image type: ' + imageType);
@@ -94,8 +89,7 @@ async function addTextToPdf(pdfDoc, fields) {
 
   const userInputTexts = boxKeys.map((boxKey) => {
     const inputTextArray = fields[boxKey];
-    const value = Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
-    return typeof value === 'string' ? value : '';
+    return Array.isArray(inputTextArray) && inputTextArray.length > 0 ? inputTextArray[0] : '';
   });
 
   const fillTexts = [];
@@ -219,22 +213,23 @@ async function addTextToPdf(pdfDoc, fields) {
     const lineSpacing = 1.2;
     const lineHeight = helveticaFont.heightAtSize(fontSize);
 
-    function calculateYOffset(linesCount) {
-      if (linesCount <= 4) {
-        return 17;
-      } else {
-        return 17 + (linesCount - 4) * 7;
-      }
-    }
+    
+function calculateYOffset(linesCount) {
+  if (linesCount <= 4) {
+    return 17;
+  } else {
+    return 17 + (linesCount - 4) * 7;
+  }
+}
 
-    let startY;
-    if (lines.length === 1) {
-      startY = position.y + (maxHeight - lineHeight) / 2;
-    } else {
-      const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
-      const yOffset = calculateYOffset(lines.length);
-      startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
-    }
+let startY;
+if (lines.length === 1) {
+  startY = position.y + (maxHeight - lineHeight) / 2;
+} else {
+  const totalTextHeight = lineHeight * lines.length + (lineSpacing * (lines.length - 1) * lineHeight);
+  const yOffset = calculateYOffset(lines.length);
+  startY = position.y + (maxHeight + totalTextHeight) / 2 - yOffset - lineHeight;
+}
 
     const longestLineIndex = lines.reduce((maxIndex, currentLine, currentIndex, array) => {
       return helveticaFont.widthOfTextAtSize(currentLine, fontSize) > helveticaFont.widthOfTextAtSize(array[maxIndex], fontSize)
@@ -272,5 +267,5 @@ async function addTextToPdf(pdfDoc, fields) {
 
 module.exports = { 
     addTextToPdf,
-    addImageToPdf
+    addImageToPdf 
 };
