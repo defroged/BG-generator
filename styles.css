@@ -96,7 +96,8 @@ h2 {
 .esl-link {
     position: fixed;
     left: 50px;
-	transition: left 0.5s; 
+	top: 10px; 
+    transition: left 0.5s; 
 }
 
 .esl-link img {
